@@ -1,9 +1,7 @@
 import json
 import os
 from datetime import datetime
-import sys
-from PyQt5.QtWidgets import QApplication, QMessageBox
-from log_importer import extract_leaderboard_data
+import statics
 from leaderboard import Leaderboard, PlayerRecord, MetricDataPoint
 
 RECORDS_FILE = "records.json"
@@ -14,50 +12,27 @@ defaultSettings = {
 }
 
 
-def get_log_filepath():
+def game_filepath():
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
             try:
                 data = json.load(f)
-                return data.get("log_filepath",
-                                "C:\\Program Files(x86)\\Steam\\steamapps\\common\\Mechabellum") + "\\ProjectDatas\\Log"
+                log_path = os.path.join(data.get("game_dir", defaultSettings["game_dir"]))
             except json.JSONDecodeError:
-                print("Error loading settings.json. Using default log path.")
-    else:
-        with open(SETTINGS_FILE, "w") as file:
-            json.dump(defaultSettings, file, indent=4)
-    return "C:\\Program Files(x86)\\Steam\\steamapps\\common\\Mechabellum\\ProjectDatas\\Log"
-
-
-def get_log_filepath():
-    if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
-            try:
-                data = json.load(f)
-                log_path = os.path.join(data.get("game_dir", defaultSettings["game_dir"]), "ProjectDatas",
-                                        "Log")
-            except json.JSONDecodeError:
-                log_path = os.path.join(defaultSettings["game_dir"], "ProjectDatas", "Log")
+                log_path = defaultSettings["game_dir"]
     else:
         with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
             json.dump(defaultSettings, file, indent=4)
-        log_path = os.path.join(defaultSettings["game_dir"], "ProjectDatas", "Log")
+        log_path = defaultSettings["game_dir"]
 
     if not os.path.exists(log_path):
-        show_error_and_exit(f"Could not find game folder! Please change in the settings.json file")
-
+        statics.show_error(f"Could not find game folder! Please change in the settings.json file",
+                           exitApp=True)
     return log_path
 
 
-def show_error_and_exit(message):
-    app = QApplication(sys.argv)
-    msg_box = QMessageBox()
-    msg_box.setIcon(QMessageBox.Warning)
-    msg_box.setText(message)
-    msg_box.setWindowTitle("Error")
-    msg_box.setStandardButtons(QMessageBox.Ok)
-    msg_box.exec_()
-    sys.exit(1)  # Exit the application
+def game_log_filepath():
+    return os.path.join(game_filepath(), "ProjectDatas", "Log")
 
 
 def load_leaderboard():

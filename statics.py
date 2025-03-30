@@ -1,5 +1,7 @@
 import win32gui
 from PyQt5.QtGui import QColor
+import sys
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
 
 class RelativeScreenWindowTransformResult:
@@ -25,3 +27,15 @@ def calculate_color(percentage: float):
     green_hue = 100.0 / 360.0
     hue = percentage * green_hue
     return QColor.fromHsvF(hue, 1 - 0.5 * hue, 1 - 0.5 * hue).name()
+
+
+def show_error(message, exitApp=False):
+    app = QApplication(sys.argv)
+    msg_box = QMessageBox()
+    msg_box.setIcon(QMessageBox.Warning)
+    msg_box.setText(message)
+    msg_box.setWindowTitle("Error")
+    msg_box.setStandardButtons(QMessageBox.Ok)
+    msg_box.exec_()
+    if exitApp:
+        sys.exit(1)  # Exit the application

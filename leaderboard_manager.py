@@ -6,7 +6,7 @@ def load_leaderboard():
     print("Loading existing leaderboard data...")
     leaderboard = settings.load_leaderboard()
     print("Importing new records from logs...")
-    new_leaderboard = extract_leaderboard_data(settings.get_log_filepath())
+    new_leaderboard = extract_leaderboard_data(settings.game_log_filepath())
 
     print("Merging data...")
     merge_leaderboards(new_leaderboard, leaderboard)

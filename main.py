@@ -1,3 +1,4 @@
+import os
 import sys
 import matplotlib.pyplot as plt
 import matplotlib
@@ -6,10 +7,11 @@ import pywinstyles
 from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QIcon, QColor, QBrush, QPixmap
 from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QPushButton, \
-    QWidget, QMainWindow, QSplashScreen
+    QWidget, QMainWindow, QSplashScreen, QHBoxLayout
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 
 import leaderboard_manager
+import settings
 import statics
 
 from picker import PlayerPicker
@@ -73,11 +75,20 @@ class Window(QMainWindow):
         self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
 
+        self.button_layout = QHBoxLayout()
+
         self.picker_window = None
+        self.pick_player_btn = QPushButton("Start Game", self)
+        self.pick_player_btn.setFixedHeight(40)
+        self.pick_player_btn.clicked.connect(self.launch_game)
+        self.button_layout.addWidget(self.pick_player_btn)
+
         self.pick_player_btn = QPushButton("Pick Player", self)
         self.pick_player_btn.setFixedHeight(40)
         self.pick_player_btn.clicked.connect(self.pick_player)
-        self.layout.addWidget(self.pick_player_btn)
+        self.button_layout.addWidget(self.pick_player_btn)
+
+        self.layout.addLayout(self.button_layout)
 
         self.selected_players_frame = QFrame(self)
         self.selected_players_frame.setFrameShape(QFrame.StyledPanel)
@@ -224,6 +235,13 @@ class Window(QMainWindow):
             spine.set_edgecolor('grey')
 
         self.canvas.draw()
+
+    def launch_game(self):
+        game_exe = os.path.join(settings.game_filepath(), "Mechabellum.exe")
+        if os.path.exists(game_exe):
+            os.startfile(game_exe)
+        else:
+            statics.show_error("Game executable not found!\n" + game_exe)
 
     def eventFilter(self, source, event):
         if source == self.infoBar:
