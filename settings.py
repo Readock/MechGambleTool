@@ -7,27 +7,60 @@ from leaderboard import Leaderboard, PlayerRecord, MetricDataPoint
 RECORDS_FILE = "records.json"
 SETTINGS_FILE = "settings.json"
 
-defaultSettings = {
-    "game_dir": "C:\\Program Files(x86)\\Steam\\steamapps\\common\\Mechabellum"
-}
+__settings = None
 
 
-def game_filepath():
+class Settings:
+    def __init__(self, game_dir=None, fuzzy_threshold=None):
+        self.game_dir = game_dir or "C:\\Program Files(x86)\\Steam\\steamapps\\common\\Mechabellum"
+        self.fuzzy_threshold = fuzzy_threshold or 80
+
+    def to_dict(self):
+        """Convert settings object to dictionary."""
+        return {
+            "game_dir": self.game_dir,
+            "fuzzy_threshold": self.fuzzy_threshold
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        """Create a Settings object from a dictionary."""
+        return cls(
+            game_dir=data.get("game_dir"),
+            fuzzy_threshold=data.get("fuzzy_threshold")
+        )
+
+    def save(self, path="settings.json"):
+        """Save current settings to a JSON file."""
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.to_dict(), f, indent=4)
+
+
+def get_settings():
+    global __settings
+    if __settings is not None:
+        return __settings
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
             try:
                 data = json.load(f)
-                log_path = os.path.join(data.get("game_dir", defaultSettings["game_dir"]))
+                __settings = Settings.from_dict(data)
             except json.JSONDecodeError:
-                log_path = defaultSettings["game_dir"]
+                # default settings
+                __settings = Settings()
     else:
-        with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
-            json.dump(defaultSettings, file, indent=4)
-        log_path = defaultSettings["game_dir"]
+        __settings = Settings()
+    __settings.save()
+    return __settings
+
+
+def game_filepath():
+    log_path = get_settings().game_dir
 
     if not os.path.exists(log_path):
-        statics.show_error(f"Could not find game folder! Please change in the settings.json file",
+        statics.show_error(f"Could not find game folder at: {log_path}. Please change it in the settings.json file",
                            exitApp=True)
+
     return log_path
 
 

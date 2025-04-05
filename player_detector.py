@@ -2,22 +2,15 @@ from PIL import ImageGrab
 import easyocr
 import asyncio
 
+import settings
 import statics
 from leaderboard import Leaderboard
 from fuzzywuzzy import fuzz
 from PyQt5.QtCore import QObject, pyqtSignal
 
 
-# reader = None
-#
-#
-# def init():
-#     global reader
-#     # takes a while
-#     reader = easyocr.Reader(['ch_sim', 'en'])
-
-
-def is_fuzzy_match(target, candidates, threshold=70):
+def is_fuzzy_match(target, candidates):
+    threshold = settings.get_settings().fuzzy_threshold
     return any(fuzz.ratio(target, c) >= threshold for c in candidates)
 
 

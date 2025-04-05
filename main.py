@@ -10,7 +10,6 @@ from PyQt5.QtGui import QIcon, QColor, QBrush, QPixmap
 from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QPushButton, \
     QWidget, QMainWindow, QSplashScreen, QHBoxLayout
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from qasync import QEventLoop
 import threading
 
 import leaderboard_manager
@@ -34,7 +33,7 @@ class DraggableTitleBar(QFrame):
 
         # Force visibility
         self.setStyleSheet("""
-            background-color: white !important;  /* Medium gray */
+            background-color: black !important;  /* Medium gray */
             border: 0;
             border-radius: 0;
             opacity: 1;
@@ -77,6 +76,8 @@ class Window(QMainWindow):
 
         self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
+
+        # self.layout.addWidget(DraggableTitleBar(self))
 
         self.button_layout = QHBoxLayout()
 
