@@ -77,7 +77,7 @@ class Window(QMainWindow):
 
         self.button_layout = QHBoxLayout()
 
-        self.picker_window = None
+        self.picker_window = None  # jear
         self.start_game_btn = QPushButton("Start Game", self)
         self.start_game_btn.setFixedHeight(40)
         self.start_game_btn.clicked.connect(self.launch_game)
