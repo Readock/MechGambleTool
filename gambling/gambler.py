@@ -14,7 +14,7 @@ from gambling import GambleScreenCoords
 from gambling.GambleScreenCoords import GambleScreenCoordsCalibration
 from ui.CollapsibleBox import CollapsibleBox
 
-DATA_FILE = "../recent.json"
+DATA_FILE = "recent_bets.json"
 MAX_BUTTONS = 5
 
 class Gambler(QMainWindow):
