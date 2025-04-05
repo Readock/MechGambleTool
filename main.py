@@ -309,7 +309,7 @@ class Window(QMainWindow):
             self.picker_window.close()
         if self.gamble_window:
             self.gamble_window.close()
-        if self.gamble_window:
+        if self.minimized_widget:
             self.minimized_widget.close()
         event.accept()
 
