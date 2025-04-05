@@ -78,10 +78,10 @@ class Window(QMainWindow):
         self.button_layout = QHBoxLayout()
 
         self.picker_window = None
-        self.pick_player_btn = QPushButton("Start Game", self)
-        self.pick_player_btn.setFixedHeight(40)
-        self.pick_player_btn.clicked.connect(self.launch_game)
-        self.button_layout.addWidget(self.pick_player_btn)
+        self.start_game_btn = QPushButton("Start Game", self)
+        self.start_game_btn.setFixedHeight(40)
+        self.start_game_btn.clicked.connect(self.launch_game)
+        self.button_layout.addWidget(self.start_game_btn)
 
         self.pick_player_btn = QPushButton("Pick Player", self)
         self.pick_player_btn.setFixedHeight(40)

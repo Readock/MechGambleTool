@@ -3,13 +3,14 @@ import re
 import json
 from datetime import datetime
 
+import statics
 from leaderboard import Leaderboard, PlayerRecord, MetricDataPoint
 
 
 def extract_leaderboard_data(log_folder):
     leaderboard = Leaderboard()
     pattern = re.compile(
-        r"\[Info\]\[(\d{2}:\d{2}:\d{2}) (\d{4}/\d{2}/\d{2}).*\] recv message \[\d+\] - \[ResponseRankList\]")
+        r"\[Info]\[(\d{2}:\d{2}:\d{2}) (\d{4}/\d{2}/\d{2}).*] recv message \[\d+] - \[ResponseRankList]")
 
     for filename in os.listdir(log_folder):
         if filename.endswith(".txt"):
@@ -28,7 +29,10 @@ def process_log(lines, leaderboard, pattern):
             timestamp = datetime.strptime(f"{date_part} {time_part}", "%Y/%m/%d %H:%M:%S")
             json_data = extract_json_data(lines[i + 1:])
             if json_data:
-                update_leaderboard(json_data, leaderboard, timestamp)
+                if "players" not in json_data or len(json_data["players"]) != 200:
+                    statics.show_error("Failed parsing log leaderboard json!\nDid not have expected 200 players")
+                else:
+                    update_leaderboard(json_data, leaderboard, timestamp)
 
 
 def extract_json_data(json_lines):
