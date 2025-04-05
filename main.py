@@ -363,5 +363,6 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     t = threading.Thread(target=init_thread, args=(loop, app,))
     t.start()
+
     qdarktheme.setup_theme()
     sys.exit(app.exec_())

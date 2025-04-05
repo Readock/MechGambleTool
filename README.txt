@@ -1,6 +1,10 @@
-Leaderboard Tool :)
+# Leaderboard Tool :)
 
-build with `pyinstaller -F --noconsole --onefile --windowed --icon=resources/w0BJbj40_400x400.jpg main.py`
+### Building:
+
+pyinstaller -F --noconsole --onefile --windowed --icon=resources/w0BJbj40_400x400.jpg main.py
+
+### Dependencies:
 
 pip install cnocr[ort-cpu]
 pip install pyqt5-tools

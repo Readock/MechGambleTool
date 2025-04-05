@@ -1,7 +1,5 @@
 from PIL import ImageGrab
-import easyocr
 import asyncio
-
 import settings
 import statics
 from leaderboard import Leaderboard
@@ -23,7 +21,8 @@ class PlayerDetector(QObject):
         self.ready: pyqtSignal
 
     async def init(self):
-        self.reader = await asyncio.to_thread(lambda: easyocr.Reader(['ch_sim', 'en']))
+        from easyocr import Reader
+        self.reader = await asyncio.to_thread(lambda: Reader(['ch_sim', 'en']))
         self.ready.emit()
 
     def detect_player(self, leaderboard: Leaderboard):
