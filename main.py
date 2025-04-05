@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -9,11 +10,14 @@ from PyQt5.QtGui import QIcon, QColor, QBrush, QPixmap
 from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QPushButton, \
     QWidget, QMainWindow, QSplashScreen, QHBoxLayout
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from qasync import QEventLoop
+import threading
 
 import leaderboard_manager
 import settings
 import statics
 from picker import PlayerPicker
+from player_detector import PlayerDetector
 
 
 class DraggableTitleBar(QFrame):
@@ -82,6 +86,16 @@ class Window(QMainWindow):
         self.start_game_btn.clicked.connect(self.launch_game)
         self.button_layout.addWidget(self.start_game_btn)
 
+        self.detect_player_btn = QPushButton("Detect Players", self)
+        self.detect_player_btn.setFixedHeight(40)
+        self.detect_player_btn.setDisabled(True)
+        self.detect_player_btn.clicked.connect(self.detect_player)
+        self.button_layout.addWidget(self.detect_player_btn)
+
+        # init detector
+        self.detector = PlayerDetector()
+        self.detector.ready.connect(self.on_detector_ready)
+
         self.pick_player_btn = QPushButton("Pick Player", self)
         self.pick_player_btn.setFixedHeight(40)
         self.pick_player_btn.clicked.connect(self.pick_player)
@@ -123,6 +137,14 @@ class Window(QMainWindow):
     def on_table_clicked(self, item):
         player_id = item.data(Qt.UserRole)
         self.toggle_player_select(player_id)
+
+    def detect_player(self):
+        self.selected_players = self.detector.detect_player(self.leaderboard)
+        self.update_view()
+
+    def on_detector_ready(self):
+        print("detector is ready!")
+        self.detect_player_btn.setDisabled(False)
 
     def pick_player(self):
         if self.picker_window:
@@ -279,11 +301,19 @@ class App(QApplication):
         self.main_window.show()
 
 
+def init_thread(loop, app):
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(app.main_window.detector.init())
+
+
 if __name__ == "__main__":
     App.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     App.setAttribute(Qt.AA_EnableHighDpiScaling)
     App.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
     app = App()
+    loop = asyncio.get_event_loop()
+    t = threading.Thread(target=init_thread, args=(loop, app,))
+    t.start()
     qdarktheme.setup_theme()
     sys.exit(app.exec_())

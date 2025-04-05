@@ -10,3 +10,6 @@ pip install sv-ttk
 pip install pywin32
 pip install win32gui win32con
 pip install pillow
+pip install fuzzywuzzy python-Levenshtein
+pip install easyocr
+pip install qasync
