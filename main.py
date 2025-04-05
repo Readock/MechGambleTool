@@ -15,6 +15,9 @@ import threading
 import leaderboard_manager
 import settings
 import statics
+
+from gambling.gambler import Gambler
+
 from picker import PlayerPicker
 from player_detector import PlayerDetector
 
@@ -81,6 +84,12 @@ class Window(QMainWindow):
 
         self.button_layout = QHBoxLayout()
 
+        self.gamble_window = None
+        self.gamble_btn = QPushButton("Gamble", self)
+        self.gamble_btn.setFixedHeight(40)
+        self.gamble_btn.clicked.connect(self.gamble)
+        self.button_layout.addWidget(self.gamble_btn)
+
         self.picker_window = None
         self.start_game_btn = QPushButton("Start Game", self)
         self.start_game_btn.setFixedHeight(40)
@@ -133,8 +142,6 @@ class Window(QMainWindow):
 
         self.figure.tight_layout()
 
-        self.pick_player()
-
     def on_table_clicked(self, item):
         player_id = item.data(Qt.UserRole)
         self.toggle_player_select(player_id)
@@ -150,9 +157,20 @@ class Window(QMainWindow):
     def pick_player(self):
         if self.picker_window:
             self.picker_window.close()
-        self.picker_window = PlayerPicker(leaderboard=self.leaderboard, on_select_callback=self.toggle_player_select)
-        pywinstyles.apply_style(self.picker_window, "dark")
-        self.picker_window.show()
+            self.picker_window = None
+        else:
+            self.picker_window = PlayerPicker(leaderboard=self.leaderboard, on_select_callback=self.toggle_player_select)
+            pywinstyles.apply_style(self.picker_window, "dark")
+            self.picker_window.show()
+
+    def gamble(self):
+        if self.gamble_window:
+            self.gamble_window.close()
+            self.gamble_window = None
+        else:
+            self.gamble_window = Gambler(leaderboard=self.leaderboard)
+            pywinstyles.apply_style(self.gamble_window, "dark")
+            self.gamble_window.show()
 
     def toggle_player_select(self, player_id):
         if any(player_id == p.id for p in self.selected_players):
@@ -285,6 +303,8 @@ class Window(QMainWindow):
         # Close all other windows when the main window is closed
         if self.picker_window:
             self.picker_window.close()
+        if self.gamble_window:
+            self.gamble_window.close()
         event.accept()
 
 

@@ -13,3 +13,6 @@ pip install pillow
 pip install fuzzywuzzy python-Levenshtein
 pip install easyocr
 pip install qasync
+pip install pynput
+pip install pyautogui
+pip install tkinter
