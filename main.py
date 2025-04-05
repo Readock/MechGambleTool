@@ -13,7 +13,6 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 import leaderboard_manager
 import settings
 import statics
-
 from picker import PlayerPicker
 
 
