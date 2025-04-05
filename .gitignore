@@ -2,6 +2,8 @@
 # data
 settings.json
 records.json
+right_player_name.png
+left_player_name.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
