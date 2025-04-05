@@ -17,6 +17,7 @@ import settings
 import statics
 
 from gambling.gambler import Gambler
+from minimized_widget import MinimizedWidget
 
 from picker import PlayerPicker
 from player_detector import PlayerDetector
@@ -68,6 +69,8 @@ class Window(QMainWindow):
 
         transform = statics.relative_screen_window_transform(800, 500, 0.5, 0.99)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
+
+        self.minimized_widget = None
 
         self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
         self.setWindowTitle("GambleBellumTool (GBT)")
@@ -155,22 +158,23 @@ class Window(QMainWindow):
         self.detect_player_btn.setDisabled(False)
 
     def pick_player(self):
-        if self.picker_window:
+        if self.picker_window and self.gamble_window.isVisible() and not self.picker_window.isMinimized():
             self.picker_window.close()
             self.picker_window = None
         else:
-            self.picker_window = PlayerPicker(leaderboard=self.leaderboard, on_select_callback=self.toggle_player_select)
+            self.picker_window = PlayerPicker(leaderboard=self.leaderboard,
+                                              on_select_callback=self.toggle_player_select)
             pywinstyles.apply_style(self.picker_window, "dark")
-            self.picker_window.show()
+            self.picker_window.showNormal()
 
     def gamble(self):
-        if self.gamble_window:
+        if self.gamble_window and self.gamble_window.isVisible() and not self.gamble_window.isMinimized():
             self.gamble_window.close()
             self.gamble_window = None
         else:
             self.gamble_window = Gambler(leaderboard=self.leaderboard)
             pywinstyles.apply_style(self.gamble_window, "dark")
-            self.gamble_window.show()
+            self.gamble_window.showNormal()
 
     def toggle_player_select(self, player_id):
         if any(player_id == p.id for p in self.selected_players):
@@ -305,7 +309,30 @@ class Window(QMainWindow):
             self.picker_window.close()
         if self.gamble_window:
             self.gamble_window.close()
+        if self.gamble_window:
+            self.minimized_widget.close()
         event.accept()
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.WindowStateChange:
+            if self.windowState() & Qt.WindowMinimized:
+                if not self.minimized_widget:
+                    self.minimized_widget = MinimizedWidget(on_expand_callback=self.showNormal)
+                    pywinstyles.apply_style(self.minimized_widget, "dark")
+                    self.minimized_widget.show()
+                if self.picker_window:
+                    self.picker_window.showMinimized()
+                if self.gamble_window:
+                    self.gamble_window.showMinimized()
+            elif event.oldState() & Qt.WindowMinimized and not self.windowState() & Qt.WindowMinimized:
+                self.minimized_widget.close()
+                self.minimized_widget = None
+                if self.picker_window:
+                    self.picker_window.showNormal()
+                if self.gamble_window:
+                    self.gamble_window.showNormal()
+
+        super().changeEvent(event)
 
 
 class App(QApplication):
