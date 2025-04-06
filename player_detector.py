@@ -11,7 +11,7 @@ import numpy as np
 
 def is_fuzzy_match(target, candidates):
     threshold = settings.get_settings().fuzzy_threshold
-    return any(fuzz.ratio(target, c) >= threshold for c in candidates)
+    return any(fuzz.ratio(target.lower(), c.lower()) >= threshold for c in candidates)
 
 
 def to_maked_image(image):
