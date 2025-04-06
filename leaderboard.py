@@ -62,7 +62,10 @@ class PlayerStats:
     def add_record(self, record: PlayerRecord):
         self.records.append(record)
 
-    def calculate_score(self, max_metrics: MetricDataPoint):
+    def calculate_score(self, max_metrics: MetricDataPoint, last_timestamp):
+        if last_timestamp != self.records[-1].timestamp:
+            self.score = -1  # unknown
+            return
         loss_ratio = math.sqrt(math.sqrt(self.max_metrics.total_wins / (self.max_metrics.power / 600)))
         mmr_percentage = (self.current_metrics.mmr / max_metrics.mmr)
         power_percentage = (self.current_metrics.power / max_metrics.power)
@@ -111,7 +114,7 @@ class Leaderboard:
 
         for player in self.players.values():
             player.update_metrics()
-            player.calculate_score(self.max_metrics)
+            player.calculate_score(self.max_metrics, self.last_timestamp)
 
         sorted_players = sorted(self.players.values(), key=lambda p: p.score, reverse=True)
 

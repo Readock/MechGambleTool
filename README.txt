@@ -2,7 +2,7 @@
 
 ### Building:
 
-pyinstaller -F --noconsole --onefile --windowed --icon=resources/w0BJbj40_400x400.jpg main.py
+pyinstaller -F --noconsole --windowed --icon=resources/w0BJbj40_400x400.jpg main.py
 
 ### Dependencies:
 
