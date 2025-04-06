@@ -5,11 +5,20 @@ import statics
 from leaderboard import Leaderboard
 from fuzzywuzzy import fuzz
 from PyQt5.QtCore import QObject, pyqtSignal
+import cv2
+import numpy as np
 
 
 def is_fuzzy_match(target, candidates):
     threshold = settings.get_settings().fuzzy_threshold
     return any(fuzz.ratio(target, c) >= threshold for c in candidates)
+
+
+def to_maked_image(image):
+    lower_bound_white = np.array([190, 190, 190], dtype=np.uint8)
+    upper_bound_white = np.array([255, 255, 255], dtype=np.uint8)
+    white_mask = cv2.inRange(np.array(image.convert("RGB")), lower_bound_white, upper_bound_white)
+    return cv2.cvtColor(white_mask, cv2.COLOR_GRAY2BGR)
 
 
 class PlayerDetector(QObject):
@@ -60,10 +69,12 @@ class PlayerDetector(QObject):
 
         left_path = "left_player_name.png"
         right_path = "right_player_name.png"
-        left_img.save(left_path)
-        right_img.save(right_path)
+
+        cv2.imwrite(left_path, to_maked_image(left_img))
+        cv2.imwrite(right_path, to_maked_image(right_img))
 
         left_result = self.reader.readtext(left_path, detail=0)
         right_result = self.reader.readtext(right_path, detail=0)
-
+        print("Detected text left: " + ', '.join(left_result))
+        print("Detected text right: " + ', '.join(right_result))
         return left_result + right_result

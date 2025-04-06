@@ -13,7 +13,7 @@ __settings = None
 class Settings:
     def __init__(self, game_dir=None, fuzzy_threshold=None):
         self.game_dir = game_dir or "C:\\Program Files(x86)\\Steam\\steamapps\\common\\Mechabellum"
-        self.fuzzy_threshold = fuzzy_threshold or 80
+        self.fuzzy_threshold = fuzzy_threshold or 85
 
     def to_dict(self):
         """Convert settings object to dictionary."""
