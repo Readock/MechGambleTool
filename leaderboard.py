@@ -1,5 +1,4 @@
 import math
-from statistics import median
 
 from statics import calculate_color
 
@@ -28,7 +27,6 @@ class PlayerStats:
         self.records = [start_record]
         self.current_metrics = start_record.metrics
         self.max_metrics = start_record.metrics
-        self.median_metrics = start_record.metrics
         self.min_metrics = start_record.metrics
         self.score = None
         self.score_rank = None
@@ -48,11 +46,6 @@ class PlayerStats:
             max(power_values),
             total_wins=max(total_wins_values)
         )
-        self.median_metrics = MetricDataPoint(
-            int(median(mmr_values)),
-            int(median(power_values)),
-            total_wins=int(median(total_wins_values))
-        )
         self.min_metrics = MetricDataPoint(
             min(mmr_values),
             min(power_values),
@@ -63,13 +56,12 @@ class PlayerStats:
         self.records.append(record)
 
     def calculate_score(self, max_metrics: MetricDataPoint, last_timestamp):
-        if last_timestamp != self.records[-1].timestamp:
-            self.score = -1  # unknown
-            return
         loss_ratio = math.sqrt(math.sqrt(self.max_metrics.total_wins / (self.max_metrics.power / 600)))
         mmr_percentage = (self.current_metrics.mmr / max_metrics.mmr)
         power_percentage = (self.current_metrics.power / max_metrics.power)
         self.score = mmr_percentage * 9 + power_percentage * 1 - loss_ratio * 0.1
+        if last_timestamp != self.records[-1].timestamp:
+            self.score = self.score - 10  # outside top 200 so should have a negative score
 
 
 class Leaderboard:
@@ -95,6 +87,8 @@ class Leaderboard:
         return sorted(self.players.values(), key=lambda p: p.score_rank)
 
     def update_metrics(self):
+        for player in self.players.values():
+            player.update_metrics()
         self.last_timestamp = max(max(r.timestamp for r in p.records) for p in self.players.values())
         self.timestamps = sorted(set(
             record.timestamp for player in self.players.values() for record in player.records
@@ -113,7 +107,6 @@ class Leaderboard:
         )
 
         for player in self.players.values():
-            player.update_metrics()
             player.calculate_score(self.max_metrics, self.last_timestamp)
 
         sorted_players = sorted(self.players.values(), key=lambda p: p.score, reverse=True)
