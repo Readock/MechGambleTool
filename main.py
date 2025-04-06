@@ -17,7 +17,7 @@ import settings
 import statics
 
 from gambling.gambler import Gambler
-from minimized_widget import MinimizedWidget
+from tool_widget import ToolWidget, ToolWidgetButtonDefinition
 
 from picker import PlayerPicker
 from player_detector import PlayerDetector
@@ -60,6 +60,7 @@ class DraggableTitleBar(QFrame):
 
 
 class Window(QMainWindow):
+
     def __init__(self, parent=None, leaderboard=None):
         super().__init__(parent=parent)
         # self.setWindowFlags(
@@ -67,10 +68,52 @@ class Window(QMainWindow):
         self.setWindowFlags(
             Qt.Window | Qt.WindowStaysOnTopHint)
 
-        transform = statics.relative_screen_window_transform(800, 500, 0.5, 0.99)
+        transform = statics.relative_screen_window_transform(800, 400, 0.5, 0.95)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
 
-        self.minimized_widget = None
+        self.gamble_window = None
+        self.picker_window = None
+        self.tool_widget = ToolWidget(tool_buttons=[
+            ToolWidgetButtonDefinition(
+                icon_name="fa6s.ticket",
+                tooltip="Gamble",
+                color="#1297a6",
+                callback=self.gamble
+            ),
+            ToolWidgetButtonDefinition(
+                icon_name="fa6s.rocket",
+                tooltip="Launch Game",
+                color="#368a33",
+                callback=self.launch_game
+            ),
+            ToolWidgetButtonDefinition(
+                icon_name="fa6s.chart-line",
+                tooltip="Chart",
+                color="#125aa6",
+                callback=self.toggle_self
+            ),
+            ToolWidgetButtonDefinition(
+                icon_name="fa6s.wand-magic-sparkles",
+                tooltip="Detect Players",
+                color="#77338a",
+                callback=self.detect_player,
+                is_detect_button=True
+            ),
+            ToolWidgetButtonDefinition(
+                icon_name="fa6s.user",
+                tooltip="Pick Player",
+                color="#d6a124",
+                callback=self.pick_player
+            ),
+            ToolWidgetButtonDefinition(
+                icon_name="fa6s.xmark",
+                tooltip="Close Program",
+                color="#a61212",
+                callback=self.close_app
+            )
+        ])
+        pywinstyles.apply_style(self.tool_widget, "dark")
+        self.tool_widget.show()
 
         self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
         self.setWindowTitle("GambleBellumTool (GBT)")
@@ -83,38 +126,9 @@ class Window(QMainWindow):
         self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
 
-        # self.layout.addWidget(DraggableTitleBar(self))
-
-        self.button_layout = QHBoxLayout()
-
-        self.gamble_window = None
-        self.gamble_btn = QPushButton("Gamble", self)
-        self.gamble_btn.setFixedHeight(40)
-        self.gamble_btn.clicked.connect(self.gamble)
-        self.button_layout.addWidget(self.gamble_btn)
-
-        self.picker_window = None
-        self.start_game_btn = QPushButton("Start Game", self)
-        self.start_game_btn.setFixedHeight(40)
-        self.start_game_btn.clicked.connect(self.launch_game)
-        self.button_layout.addWidget(self.start_game_btn)
-
-        self.detect_player_btn = QPushButton("Detect Players", self)
-        self.detect_player_btn.setFixedHeight(40)
-        self.detect_player_btn.setDisabled(True)
-        self.detect_player_btn.clicked.connect(self.detect_player)
-        self.button_layout.addWidget(self.detect_player_btn)
-
         # init detector
         self.detector = PlayerDetector()
         self.detector.ready.connect(self.on_detector_ready)
-
-        self.pick_player_btn = QPushButton("Pick Player", self)
-        self.pick_player_btn.setFixedHeight(40)
-        self.pick_player_btn.clicked.connect(self.pick_player)
-        self.button_layout.addWidget(self.pick_player_btn)
-
-        self.layout.addLayout(self.button_layout)
 
         self.selected_players_frame = QFrame(self)
         self.selected_players_frame.setFrameShape(QFrame.StyledPanel)
@@ -144,6 +158,7 @@ class Window(QMainWindow):
         self.populate_plot()
 
         self.figure.tight_layout()
+        self.showMinimized()
 
     def on_table_clicked(self, item):
         player_id = item.data(Qt.UserRole)
@@ -155,10 +170,10 @@ class Window(QMainWindow):
 
     def on_detector_ready(self):
         print("detector is ready!")
-        self.detect_player_btn.setDisabled(False)
+        self.tool_widget.joar_hacky_as_fuck_detect_button.setDisabled(False)
 
     def pick_player(self):
-        if self.picker_window and self.gamble_window.isVisible() and not self.picker_window.isMinimized():
+        if self.picker_window and self.picker_window.isVisible() and not self.picker_window.isMinimized():
             self.picker_window.close()
             self.picker_window = None
         else:
@@ -166,6 +181,12 @@ class Window(QMainWindow):
                                               on_select_callback=self.toggle_player_select)
             pywinstyles.apply_style(self.picker_window, "dark")
             self.picker_window.showNormal()
+
+    def toggle_self(self):
+        if self and self.isVisible() and not self.isMinimized():
+            self.showMinimized()
+        else:
+            self.showNormal()
 
     def gamble(self):
         if self.gamble_window and self.gamble_window.isVisible() and not self.gamble_window.isMinimized():
@@ -303,36 +324,19 @@ class Window(QMainWindow):
         # let Qt process any other event
         return super().eventFilter(source, event)
 
-    def closeEvent(self, event):
-        # Close all other windows when the main window is closed
+    def close_app(self):
         if self.picker_window:
             self.picker_window.close()
         if self.gamble_window:
             self.gamble_window.close()
-        if self.minimized_widget:
-            self.minimized_widget.close()
-        event.accept()
+        if self.tool_widget:
+            self.tool_widget.close()
+        sys.exit(1)  # exit app
 
-    def changeEvent(self, event):
-        if event.type() == QEvent.WindowStateChange:
-            if self.windowState() & Qt.WindowMinimized:
-                if not self.minimized_widget:
-                    self.minimized_widget = MinimizedWidget(on_expand_callback=self.showNormal)
-                    pywinstyles.apply_style(self.minimized_widget, "dark")
-                    self.minimized_widget.show()
-                if self.picker_window:
-                    self.picker_window.showMinimized()
-                if self.gamble_window:
-                    self.gamble_window.showMinimized()
-            elif event.oldState() & Qt.WindowMinimized and not self.windowState() & Qt.WindowMinimized:
-                self.minimized_widget.close()
-                self.minimized_widget = None
-                if self.picker_window:
-                    self.picker_window.showNormal()
-                if self.gamble_window:
-                    self.gamble_window.showNormal()
-
-        super().changeEvent(event)
+    def closeEvent(self, event):
+        # only minimize
+        self.showMinimized()
+        event.ignore()
 
 
 class App(QApplication):

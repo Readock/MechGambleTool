@@ -17,6 +17,7 @@ from ui.CollapsibleBox import CollapsibleBox
 DATA_FILE = "recent_bets.json"
 MAX_BUTTONS = 5
 
+
 class Gambler(QMainWindow):
     def __init__(self, parent=None, leaderboard=None):
         super().__init__(parent=parent)
@@ -25,7 +26,7 @@ class Gambler(QMainWindow):
 
         self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
 
-        transform = statics.relative_screen_window_transform(650, 200, 0.2, 0.79)
+        transform = statics.relative_screen_window_transform(650, 200, 0.2, 0.90)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
 
         self.setWindowIcon(QIcon("../resources/w0BJbj40_400x400.jpg"))
@@ -124,7 +125,7 @@ class Gambler(QMainWindow):
         self.add_recent_button(text)
         self.save_recent_buttons()
 
-# RECENT BUTTONS
+    # RECENT BUTTONS
 
     def add_recent_button(self, text):
         new_button = QPushButton(text)
@@ -154,7 +155,7 @@ class Gambler(QMainWindow):
                 except json.JSONDecodeError:
                     print("Fehler beim Laden der recent.json – Datei beschädigt?")
 
-# CALIBRATION
+    # CALIBRATION
 
     def calibrate(self):
         gamble_screen_cords = GambleScreenCoordsCalibration()
