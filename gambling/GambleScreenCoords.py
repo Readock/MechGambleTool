@@ -1,4 +1,4 @@
-﻿import tkinter as tk
+﻿from tkinter import Tk, Canvas, BOTH
 import json
 import pyautogui
 from pynput.mouse import Controller
@@ -91,7 +91,7 @@ class GambleScreenCoordsCalibration:
             # Wait for a moment and then show the root window again
             root.deiconify()  # Show the root window again
 
-        root = tk.Tk()
+        root = Tk()
 
         root.attributes('-fullscreen', True)
         root.attributes('-alpha', 0.5)
@@ -99,8 +99,8 @@ class GambleScreenCoordsCalibration:
         root.configure(bg='gray')
         root.config(cursor="crosshair")
 
-        canvas = tk.Canvas(root, bg='gray', highlightthickness=0)
-        canvas.pack(fill=tk.BOTH, expand=True)
+        canvas = Canvas(root, bg='gray', highlightthickness=0)
+        canvas.pack(fill=BOTH, expand=True)
 
         click_index = 0
         canvas.bind("<Button-1>", on_click)
