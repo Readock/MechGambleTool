@@ -59,6 +59,10 @@ def click_confirm():
     coords = load_coords_from_json()
     simulate_click(*coords['confirm'])
 
+def click_close():
+    coords = load_coords_from_json()
+    simulate_click(*coords['close_window'])
+
 def bet_team_blue(value):
     click_delay = float(settings.get_settings().click_delay)
 
@@ -69,6 +73,8 @@ def bet_team_blue(value):
     click_slider_at(value)
     time.sleep(click_delay)
     click_confirm()
+    time.sleep(click_delay)
+    click_close()
 
 def bet_team_red(value):
     click_delay = float(settings.get_settings().click_delay)
@@ -80,6 +86,8 @@ def bet_team_red(value):
     click_slider_at(value)
     time.sleep(click_delay)
     click_confirm()
+    time.sleep(click_delay)
+    click_close()
 
 
 class CoordCollector:
