@@ -149,7 +149,7 @@ class Gambler(QMainWindow):
         if self.bet_amount.text().strip() == "":
             bet_team_red(1)
         else:
-            bet_team_red(self.bet_amount.text())
+            bet_team_red(int(self.bet_amount.text()))
 
 
     def handle_main_button_click(self):
