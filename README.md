@@ -8,7 +8,6 @@ pyinstaller -F --noconsole --windowed --icon=resources/w0BJbj40_400x400.jpg main
 
 [requirements.txt](./requirements.txt)
 <!--
-pip install cnocr[ort-cpu]
 pip install pyqt5-tools
 pip install pyqtdarktheme
 pip install PyQt5-Frameless-Window
