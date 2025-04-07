@@ -140,7 +140,7 @@ class CoordCollector:
         # Hide, simulate, and continue
         self.root.withdraw()
         self.root.update()
-        time.sleep(0.15)
+        time.sleep(float(settings.get_settings().click_delay)+0.1)
         pyautogui.moveTo(x, y)
         pyautogui.click()
 
