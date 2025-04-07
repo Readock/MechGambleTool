@@ -1,7 +1,7 @@
 from PIL import ImageGrab
 import asyncio
-import settings
 import statics
+from configuration import settings
 from leaderboard import Leaderboard
 from fuzzywuzzy import fuzz
 from PyQt5.QtCore import QObject, pyqtSignal

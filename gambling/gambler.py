@@ -1,11 +1,9 @@
-﻿import sys
-
-from PyQt5.QtGui import QIcon
+﻿from PyQt5.QtGui import QIcon
 
 import json
 import os
 
-import settings
+
 import statics
 
 from PyQt5.QtWidgets import (
@@ -13,6 +11,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 
+from configuration import settings
 from gambling import GambleScreenCoords
 from gambling.GambleScreenCoords import CoordCollector, bet_team_blue, bet_team_red
 

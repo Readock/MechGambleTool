@@ -1,4 +1,4 @@
-import settings
+from configuration import settings
 from log_importer import extract_leaderboard_data
 
 
