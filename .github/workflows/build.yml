@@ -20,6 +20,17 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
+      - name: Read properties from build.properties
+        id: props
+        shell: pwsh
+        run: |
+          $props = Get-Content build.properties | ForEach-Object {
+            $parts = $_ -split '='
+            [PSCustomObject]@{ Key = $parts[0]; Value = $parts[1] }
+          }
+          foreach ($p in $props) {
+            echo "$($p.Key)=$($p.Value)" >> $env:GITHUB_ENV
+          }
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -29,16 +40,18 @@ jobs:
       - name: Build with PyInstaller
         run: |
           pyinstaller --noconsole --windowed --icon=resources/w0BJbj40_400x400.jpg main.py
+          Rename-Item -Path dist\main\main.exe -NewName "${{ env.target_name }}.exe"
+          Copy-Item -Path resources -Destination dist\main\resources -Recurse
 
       - name: Zip build folder
-        run: Compress-Archive -Path dist\main\* -DestinationPath MechGambleTool.zip
+        run: Compress-Archive -Path dist\main\* -DestinationPath ${{ env.target_name }}.zip
 
-      - name: Create Draft
+      - name: Create draft
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: main-${{ github.run_number }}
-          name: MechGambleTool Draft
+          tag_name: v${{ env.version }}.${{ github.run_number }}
+          name: "${{ env.target_name }} v${{ env.version }}.${{ github.run_number }}"
           draft: true
-          files: MechGambleTool.zip
+          files: "${{ env.target_name }}.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
