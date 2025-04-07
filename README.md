@@ -6,6 +6,7 @@ pyinstaller -F --noconsole --windowed --icon=resources/w0BJbj40_400x400.jpg main
 
 ### Dependencies:
 
+[requirements.txt](./requirements.txt)
 <!--
 pip install cnocr[ort-cpu]
 pip install pyqt5-tools

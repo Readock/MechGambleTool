@@ -1,7 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
-name: Build Python Application
+name: Build Workflow
 
 on:
   push:
@@ -33,9 +30,9 @@ jobs:
         run: |
           pyinstaller -F --noconsole --windowed --icon=resources/w0BJbj40_400x400.jpg main.py
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: Windows_qwiklabs
+          name: MechGambleTool
           path: dist/main
 
       - name: create release
