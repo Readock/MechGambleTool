@@ -1,18 +1,20 @@
-﻿from PyQt5.QtGui import QIcon
+﻿import sys
+
+from PyQt5.QtGui import QIcon
 
 import json
 import os
 
+import settings
 import statics
 
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QLineEdit, QProgressBar, QVBoxLayout, QHBoxLayout, QLabel, QMainWindow, QTabWidget
+    QWidget, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QMainWindow, QTabWidget, QSlider
 )
 from PyQt5.QtCore import Qt
 
 from gambling import GambleScreenCoords
-from gambling.GambleScreenCoords import GambleScreenCoordsCalibration
-from ui.CollapsibleBox import CollapsibleBox
+from gambling.GambleScreenCoords import CoordCollector, bet_team_blue, bet_team_red
 
 DATA_FILE = "recent_bets.json"
 MAX_BUTTONS = 5
@@ -46,51 +48,52 @@ class Gambler(QMainWindow):
         bottom_layout = QHBoxLayout()
 
         # UI-Elemente
-        button1 = QPushButton("Blue")
-        button2 = QPushButton("Red")
-        self.textfield = QLineEdit()
+        bet_blue = QPushButton("Blue")
+        bet_red = QPushButton("Red")
+        self.bet_amount = QLineEdit()
 
         tabs = QTabWidget()
         favorite_tab = QWidget()
         recent_tab = QWidget()
 
-        progress_bar = QProgressBar()
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setRange(1, 200)
 
         self.recalibrate = QPushButton("joa")
 
         # config
-        self.textfield.setPlaceholderText("Bet Amount ...")
+        self.bet_amount.setPlaceholderText("Bet Amount ...")
+
+        self.slider.setTickInterval(1)
+        self.slider.setSingleStep(1)
+        self.slider.setPageStep(10)
+        self.slider.setTickPosition(QSlider.TicksBelow)
+        self.slider.setTracking(True)  # Optional: update as you drag
 
         # Größe der Elemente
-        button1.setFixedSize(120, 60)
-        button2.setFixedSize(120, 60)
-        self.textfield.setFixedSize(120, 40)
-        progress_bar.setFixedHeight(40)
-        progress_bar.setValue(35)  # Beispielhafte Progress-Anzeige
+        bet_blue.setFixedSize(120, 60)
+        bet_red.setFixedSize(120, 60)
+        self.bet_amount.setFixedSize(120, 40)
 
-        # Farben (nur mit StyleSheet möglich)
-        progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 2px solid black;
-                text-align: center;
-            }
-            QProgressBar::chunk {
-                background-color: #00aaff;  /* Blau für den Fortschritt */
-                width: 10px;
-            }
-        """)
+        self.slider.setFixedHeight(40)
+        self.slider.setValue(1)  # Beispielhafte Progress-Anzeige
 
         # Label Style
 
         # Actions
-        button1.clicked.connect(self.handle_main_button_click)
-        button2.clicked.connect(self.handle_main_button_click)
+
+        self.slider.valueChanged.connect(self.update_text_field)
+        self.bet_amount.textChanged.connect(self.update_slider_from_text)
+
+        bet_blue.clicked.connect(self.handle_team_blue_clicked)
+        bet_red.clicked.connect(self.handle_team_red_clicked)
         self.recalibrate.clicked.connect(self.calibrate)
 
+
         # Anordnung
-        top_layout.addWidget(button1, alignment=Qt.AlignCenter)
-        top_layout.addWidget(self.textfield, alignment=Qt.AlignCenter)
-        top_layout.addWidget(button2, alignment=Qt.AlignCenter)
+        top_layout.addWidget(bet_blue, alignment=Qt.AlignCenter)
+        top_layout.addWidget(self.bet_amount, alignment=Qt.AlignCenter)
+        top_layout.addWidget(bet_red, alignment=Qt.AlignCenter)
 
         favorite_tab.setLayout(self.favourite_buttons_layout)
         recent_tab.setLayout(self.recent_buttons_layout)
@@ -98,7 +101,7 @@ class Gambler(QMainWindow):
         tabs.addTab(favorite_tab, "Favorite")
         tabs.addTab(recent_tab, "Recently Used")
 
-        progress_layout.addWidget(progress_bar)
+        progress_layout.addWidget(self.slider)
 
         bottom_layout.addWidget(self.recalibrate, alignment=Qt.AlignBottom)
 
@@ -116,9 +119,42 @@ class Gambler(QMainWindow):
 
         self.recent_buttons = []
         self.load_recent_buttons()
+        self.load_favorite_buttons()
+
+    #
+
+    def update_text_field(self, value):
+        self.bet_amount.blockSignals(True)  # Prevent recursive loop
+        self.bet_amount.setText(str(value))
+        self.bet_amount.blockSignals(False)
+
+    def update_slider_from_text(self):
+        text = self.bet_amount.text()
+        if text.isdigit():
+            value = int(text)
+            if 1 <= value <= 200:
+                self.slider.blockSignals(True)  # Prevent recursive loop
+                self.slider.setValue(value)
+                self.slider.blockSignals(False)
+
+    def handle_team_blue_clicked(self):
+        self.handle_main_button_click()
+        if self.bet_amount.text().strip() == "":
+            bet_team_blue(1)
+        else:
+            bet_team_blue(int(self.bet_amount.text()))
+
+
+    def handle_team_red_clicked(self):
+        self.handle_main_button_click()
+        if self.bet_amount.text().strip() == "":
+            bet_team_red(1)
+        else:
+            bet_team_red(self.bet_amount.text())
+
 
     def handle_main_button_click(self):
-        text = self.textfield.text().strip()
+        text = self.bet_amount.text().strip()
         if not text:
             return
 
@@ -128,9 +164,7 @@ class Gambler(QMainWindow):
     # RECENT BUTTONS
 
     def add_recent_button(self, text):
-        new_button = QPushButton(text)
-        new_button.setFixedSize(120, 60)
-        new_button.clicked.connect(lambda: self.textfield.setText(text))
+        new_button = self.create_bet_button(text)
 
         if len(self.recent_buttons) >= MAX_BUTTONS:
             old_button = self.recent_buttons.pop(0)
@@ -139,6 +173,16 @@ class Gambler(QMainWindow):
 
         self.recent_buttons.append(new_button)
         self.recent_buttons_layout.insertWidget(0, new_button)
+
+    def add_favorite_button(self, text):
+        new_button = self.create_bet_button(text)
+        self.favourite_buttons_layout.addWidget(new_button)
+
+    def create_bet_button(self, text) -> QPushButton:
+        new_button = QPushButton(text)
+        new_button.setFixedSize(120, 60)
+        new_button.clicked.connect(lambda: self.bet_amount.setText(text))
+        return new_button
 
     def save_recent_buttons(self):
         texts = [btn.text() for btn in self.recent_buttons]
@@ -155,13 +199,18 @@ class Gambler(QMainWindow):
                 except json.JSONDecodeError:
                     print("Fehler beim Laden der recent.json – Datei beschädigt?")
 
+    def load_favorite_buttons(self):
+        favorite_bets = settings.get_settings().favorite_bets
+        for number in favorite_bets:
+            self.add_favorite_button(str(number))
+
     # CALIBRATION
 
     def calibrate(self):
-        gamble_screen_cords = GambleScreenCoordsCalibration()
-        gamble_screen_cords.collect_coordinates()
+        collector = CoordCollector()
+        collector.start()
 
-        self.set_calibration_button_text()
+        self.recalibrate.setText("Recalibrate")
 
     def set_calibration_button_text(self):
         if os.path.exists(GambleScreenCoords.coords_file):

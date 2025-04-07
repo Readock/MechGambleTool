@@ -81,7 +81,7 @@ class Window(QMainWindow):
                 callback=self.gamble
             ),
             ToolWidgetButtonDefinition(
-                icon_name="fa6s.rocket",
+                icon_name="fa6b.steam",
                 tooltip="Launch Game",
                 color="#368a33",
                 callback=self.launch_game
@@ -100,7 +100,7 @@ class Window(QMainWindow):
                 is_detect_button=True
             ),
             ToolWidgetButtonDefinition(
-                icon_name="fa6s.user",
+                icon_name="fa6s.list",
                 tooltip="Pick Player",
                 color="#d6a124",
                 callback=self.pick_player
