@@ -5,7 +5,7 @@ import pyautogui
 import time
 import json
 
-import settings
+from configuration import settings
 
 COORD_LABELS = ['join_bet', 'blue_team','slider_200' , 'slider_1', 'confirm', 'close_window']
 coords_file = "screen_coords.json"

@@ -13,8 +13,9 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 import threading
 
 import leaderboard_manager
-import settings
 import statics
+from configuration import settings
+from configuration.settings_gui import SettingsUI
 
 from gambling.gambler import Gambler
 from tool_widget import ToolWidget, ToolWidgetButtonDefinition
@@ -61,8 +62,11 @@ class DraggableTitleBar(QFrame):
 
 class Window(QMainWindow):
 
-    def __init__(self, parent=None, leaderboard=None):
+    def __init__(self, parent=None, application=None, leaderboard=None):
         super().__init__(parent=parent)
+
+        self.application = application
+
         # self.setWindowFlags(
         #     Qt.Window | Qt.WindowStaysOnTopHint | Qt.CustomizeWindowHint | Qt.WindowType.FramelessWindowHint)
         self.setWindowFlags(
@@ -73,6 +77,8 @@ class Window(QMainWindow):
 
         self.gamble_window = None
         self.picker_window = None
+        self.settings_window = None
+
         self.tool_widget = ToolWidget(tool_buttons=[
             ToolWidgetButtonDefinition(
                 icon_name="fa6s.ticket",
@@ -104,6 +110,12 @@ class Window(QMainWindow):
                 tooltip="Pick Player",
                 color="#d6a124",
                 callback=self.pick_player
+            ),
+            ToolWidgetButtonDefinition(
+                icon_name="fa6s.gear",
+                tooltip="Settings",
+                color="#808080",
+                callback=self.open_settings
             ),
             ToolWidgetButtonDefinition(
                 icon_name="fa6s.xmark",
@@ -324,6 +336,15 @@ class Window(QMainWindow):
         # let Qt process any other event
         return super().eventFilter(source, event)
 
+    def open_settings(self):
+        if self.settings_window and self.settings_window.isVisible() and not self.settings_window.isMinimized():
+            self.settings_window.close()
+            self.settings_window = None
+        else:
+            self.settings_window = SettingsUI(app=self.application)
+            pywinstyles.apply_style(self.settings_window, "dark")
+            self.settings_window.showNormal()
+
     def close_app(self):
         if self.picker_window:
             self.picker_window.close()
@@ -346,7 +367,7 @@ class App(QApplication):
         self.splash.show()
 
         self.leaderboard = leaderboard_manager.load_leaderboard()
-        self.main_window = Window(leaderboard=self.leaderboard)
+        self.main_window = Window(application=self, leaderboard=self.leaderboard)
         # pywinstyles.apply_style(demo, "aero")
         pywinstyles.apply_style(self.main_window, "dark")
         self.splash.finish(None)
@@ -357,6 +378,10 @@ def init_thread(loop, app):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(app.main_window.detector.init())
 
+def restart():
+    print("Restarting application...")
+
+    os.execl(sys.executable, f'"{sys.executable}"', *sys.argv)
 
 if __name__ == "__main__":
     App.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
@@ -369,4 +394,10 @@ if __name__ == "__main__":
     t.start()
 
     qdarktheme.setup_theme()
-    sys.exit(app.exec_())
+
+    exit_code = app.exec_()
+
+    if exit_code == 100:
+        restart()
+    else:
+        sys.exit(exit_code)
