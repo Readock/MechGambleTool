@@ -6,6 +6,7 @@ pyinstaller -F --noconsole --windowed --icon=resources/w0BJbj40_400x400.jpg main
 
 ### Dependencies:
 
+<!--
 pip install cnocr[ort-cpu]
 pip install pyqt5-tools
 pip install pyqtdarktheme
@@ -21,3 +22,4 @@ pip install pynput
 pip install pyautogui
 pip install tkinter
 pip install qtawesome
+-->
