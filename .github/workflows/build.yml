@@ -40,18 +40,18 @@ jobs:
       - name: Build with PyInstaller
         run: |
           pyinstaller --noconsole --windowed --icon=resources/w0BJbj40_400x400.jpg main.py
-          Rename-Item -Path dist\main\main.exe -NewName "${{ env.target_name }}.exe"
+          Rename-Item -Path dist\main\main.exe -NewName "${{ env.name }}.exe"
           Copy-Item -Path resources -Destination dist\main\resources -Recurse
 
       - name: Zip build folder
-        run: Compress-Archive -Path dist\main\* -DestinationPath ${{ env.target_name }}.zip
+        run: Compress-Archive -Path dist\main\* -DestinationPath ${{ env.name }}.zip
 
-      - name: Create draft
+      - name: Create release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ env.version }}.${{ github.run_number }}
-          name: "${{ env.target_name }} v${{ env.version }}.${{ github.run_number }}"
-          draft: true
-          files: "${{ env.target_name }}.zip"
+          name: "${{ env.name }} v${{ env.version }}.${{ github.run_number }}"
+          draft: false
+          files: "${{ env.name }}.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
