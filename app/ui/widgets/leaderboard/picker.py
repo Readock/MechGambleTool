@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QFrame,
     QWidget, QMainWindow, QTabWidget
 
 from app import statics
+from app.configuration import settings
+import numpy as np
 
 
 class PlayerPicker(QMainWindow):
@@ -14,6 +16,7 @@ class PlayerPicker(QMainWindow):
 
         transform = statics.relative_screen_window_transform(600, 700, 0.8, 0.99)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
+        self.setWindowOpacity(settings.window_opacity())
 
         self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
         self.setWindowTitle("MechGambleTool")

@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from app import statics
+import numpy as np
 from app.leaderboard.leaderboard import Leaderboard, PlayerRecord, MetricDataPoint
 
 RECORDS_FILE = "records.json"
@@ -11,11 +12,12 @@ __settings = None
 
 
 class Settings:
-    def __init__(self, game_dir=None, fuzzy_threshold=None, favorite_bets=None, click_delay=None):
+    def __init__(self, game_dir=None, fuzzy_threshold=None, favorite_bets=None, click_delay=None, window_opacity=None):
         self.game_dir = game_dir or "C:\\Program Files(x86)\\Steam\\steamapps\\common\\Mechabellum"
         self.fuzzy_threshold = fuzzy_threshold or 75
         self.favorite_bets = favorite_bets or [1, 3, 5 ,10, 200]
         self.click_delay = click_delay or 0.2
+        self.window_opacity = window_opacity or 100
 
     def to_dict(self):
         """Convert settings object to dictionary."""
@@ -23,7 +25,8 @@ class Settings:
             "game_dir": self.game_dir,
             "fuzzy_threshold": self.fuzzy_threshold,
             "favorite_bets": self.favorite_bets,
-            "click_delay": self.click_delay
+            "click_delay": self.click_delay,
+            "window_opacity": self.window_opacity,
         }
 
     @classmethod
@@ -33,7 +36,8 @@ class Settings:
             game_dir=data.get("game_dir"),
             fuzzy_threshold=data.get("fuzzy_threshold"),
             favorite_bets=data.get("favorite_bets"),
-            click_delay=data.get("click_delay")
+            click_delay=data.get("click_delay"),
+            window_opacity=data.get("window_opacity")
         )
 
     def save(self, path="settings.json"):
@@ -73,6 +77,8 @@ def game_filepath():
 def game_log_filepath():
     return os.path.join(game_filepath(), "ProjectDatas", "Log")
 
+def window_opacity():
+    return np.clip(get_settings().window_opacity / 100.0, 0.1, 100)
 
 def load_leaderboard():
     if os.path.exists(RECORDS_FILE):

@@ -104,7 +104,6 @@ class WidgetToolBar(QMainWindow):
         button_layout.addWidget(self.detect_btn)
 
         self.leaderboard_btn = self.add_tool_button(
-
             ToolWidgetButtonDefinition(
                 icon_name="fa6s.list",
                 tooltip="Player Leaderboard",
@@ -190,20 +189,41 @@ class WidgetToolBar(QMainWindow):
             self.settings_window.close()
             self.settings_window = None
         else:
-            self.settings_window = SettingsUI(app=self.application)
+            self.settings_window = SettingsUI(app=self.application, settings_save_callback=self.settings_saved)
             pywinstyles.apply_style(self.settings_window, "dark")
             self.settings_window.showNormal()
+
+    def settings_saved(self):
+        self.reopen_all_windows()
+
+    def reopen_all_windows(self):
+        if statics.is_window_active(self.picker_window):
+            self.picker_window.close()
+            self.pick_player()
+        if statics.is_window_active(self.gamble_window):
+            self.gamble_window.close()
+            self.gamble()
+        if statics.is_window_active(self.player_chart_window):
+            self.player_chart_window.close()
+            self.player_chart()
+        if statics.is_window_active(self.settings_window):
+            self.settings_window.close()
+            self.open_settings()
 
     def close_app(self):
         if self.picker_window:
             self.picker_window.close()
+            self.picker_window = None
         if self.gamble_window:
             self.gamble_window.close()
+            self.picker_window = None
         if self.player_chart_window:
             self.player_chart_window.close()
+            self.picker_window = None
         if self.settings_window:
             self.settings_window.close()
-        sys.exit(1)  # exit app
+            self.picker_window = None
+        sys.exit(0)  # exit app
 
     def notify_detector_ready(self, detector: PlayerDetector):
         self.detector_service = detector

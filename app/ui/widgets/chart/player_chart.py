@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeade
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 
 from app import statics
+from app.configuration import settings
 
 
 class PlayerChart(QMainWindow):
@@ -19,6 +20,7 @@ class PlayerChart(QMainWindow):
         #     Qt.Window | Qt.WindowStaysOnTopHint | Qt.CustomizeWindowHint | Qt.WindowType.FramelessWindowHint)
         self.setWindowFlags(
             Qt.Window | Qt.WindowStaysOnTopHint)
+        self.setWindowOpacity(settings.window_opacity())
 
         transform = statics.relative_screen_window_transform(800, 300, 0.5, 0.95)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)

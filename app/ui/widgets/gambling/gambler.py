@@ -25,6 +25,7 @@ class Gambler(QMainWindow):
         self.leaderboard = leaderboard
 
         self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
+        self.setWindowOpacity(settings.window_opacity())
 
         transform = statics.relative_screen_window_transform(650, 200, 0.2, 0.90)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
