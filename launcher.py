@@ -111,8 +111,17 @@ def main():
     print(f"Downloading v{latest_version} version from: {zip_url}")
     new_folder = download_and_extract_zip(zip_url, latest_version)
     exe_path = find_exe_in_folder(new_folder)
-
     print(f"Downloaded successfully!")
+
+    print(f"Copy settings to new version...")
+    for file in ["records.json", "settings.json", "screen_coords.json", "recent_bets.json"]:
+        try:
+            shutil.copy(local_folder / file, new_folder / file)
+            print(f"Copied {file} successfully!")
+        except FileNotFoundError:
+            print(f"Expected {file} not found!")
+            continue
+
     launch_exe(exe_path)
 
     print(f"Deleting old versions...")
