@@ -1,18 +1,15 @@
 import asyncio
 import os
 import sys
-import matplotlib.pyplot as plt
-import matplotlib
 import qdarktheme
 import pywinstyles
-from PyQt5.QtCore import Qt, QEvent, QPoint
-from PyQt5.QtGui import QIcon, QColor, QBrush, QPixmap
-from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QWidget, \
-    QMainWindow, QSplashScreen
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QApplication, QSplashScreen
 import threading
 
 from app.leaderboard import leaderboard_manager
-from app.player_detector import PlayerDetector
+from app.service.player_detector import PlayerDetector
 from app.ui.widget_tool_bar import WidgetToolBar
 
 

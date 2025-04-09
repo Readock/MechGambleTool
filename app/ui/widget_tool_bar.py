@@ -9,7 +9,7 @@ import qtawesome as qta
 from app import statics
 from app.configuration import settings
 from app.configuration.settings_gui import SettingsUI
-from app.player_detector import PlayerDetector
+from app.service.player_detector import PlayerDetector
 from app.ui.widgets.chart.player_chart import PlayerChart
 from app.ui.widgets.gambling.gambler import Gambler
 from app.ui.widgets.leaderboard.picker import PlayerPicker
