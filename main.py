@@ -7,21 +7,20 @@ import qdarktheme
 import pywinstyles
 from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QIcon, QColor, QBrush, QPixmap
-from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QPushButton, \
-    QWidget, QMainWindow, QSplashScreen, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QWidget, \
+    QMainWindow, QSplashScreen
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 import threading
 
-import leaderboard_manager
-import statics
-from configuration import settings
-from configuration.settings_gui import SettingsUI
+from app import statics, leaderboard_manager
+from app.configuration import settings
+from app.configuration.settings_gui import SettingsUI
 
-from gambling.gambler import Gambler
-from tool_widget import ToolWidget, ToolWidgetButtonDefinition
+from app.gambling.gambler import Gambler
+from app.tool_widget import ToolWidget, ToolWidgetButtonDefinition
 
-from picker import PlayerPicker
-from player_detector import PlayerDetector
+from app.picker import PlayerPicker
+from app.player_detector import PlayerDetector
 
 
 class DraggableTitleBar(QFrame):
@@ -378,10 +377,12 @@ def init_thread(loop, app):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(app.main_window.detector.init())
 
+
 def restart():
     print("Restarting application...")
 
     os.execl(sys.executable, f'"{sys.executable}"', *sys.argv)
+
 
 if __name__ == "__main__":
     App.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
