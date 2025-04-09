@@ -76,19 +76,13 @@ def launch_exe(exe_path: Path):
     subprocess.Popen([str(exe_path)], shell=True)
 
 
-def prompt_restart():
+def ask_should_update(current, next, url):
     root = tk.Tk()
     root.withdraw()
-    return messagebox.showinfo("Update available!", "A new version was installed. Please restart now")
-
-
-def prompt_update(current, next, url):
-    root = tk.Tk()
-    root.withdraw()
-    return messagebox.askyesno("Update available!", f"""
-Current Version: {current}
+    return messagebox.askyesno("Update available!", f"""Current Version: {current}
 New Version: {next}
-Download URL: {url}
+
+{url}
 
 Do you want to download and install the new version?
     """)
@@ -106,27 +100,24 @@ def main():
     print(f"Detected Version: {local_version}")
     print(f"Latest Version: {latest_version}")
 
-    if local_version:
-        print(f"Launching current version ...")
-        exe_path = find_exe_in_folder(local_folder)
-        launch_exe(exe_path)
+    needs_update = local_version is None or latest_version > local_version
 
-    if local_version is None or latest_version > local_version:
-        if not prompt_update(local_version, latest_version, zip_url):
-            return
-        print(f"Downloading v{latest_version} version from: {zip_url}")
-        new_folder = download_and_extract_zip(zip_url, latest_version)
-        exe_path = find_exe_in_folder(new_folder)
-
-        print(f"Downloaded successfully!")
-        if not local_version:
+    if not needs_update or not ask_should_update(local_version, latest_version, zip_url):
+        if local_folder:
+            exe_path = find_exe_in_folder(local_folder)
             launch_exe(exe_path)
-            return
-        prompt_restart()
+        sys.exit(1)
 
+    print(f"Downloading v{latest_version} version from: {zip_url}")
+    new_folder = download_and_extract_zip(zip_url, latest_version)
+    exe_path = find_exe_in_folder(new_folder)
+
+    print(f"Downloaded successfully!")
+    launch_exe(exe_path)
+
+    print(f"Deleting old versions...")
     clean_old_versions(Path(f"v{latest_version}"))
-    prompt_update(local_version, latest_version, zip_url)
-    sys.exit(1)  # Exit the application
+    sys.exit(1)
 
 
 if __name__ == "__main__":
