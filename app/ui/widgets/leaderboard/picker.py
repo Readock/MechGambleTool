@@ -1,13 +1,13 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QColor, QBrush
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QLineEdit, \
-    QWidget, QMainWindow
+    QWidget, QMainWindow, QTabWidget
 
 from app import statics
 
 
 class PlayerPicker(QMainWindow):
-    def __init__(self, parent=None, on_select_callback=None, leaderboard=None):
+    def __init__(self, parent=None, on_select_callback=None, leaderboard=None, selected_players=None):
         super().__init__(parent=parent)
         self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         self.on_select_callback = on_select_callback
@@ -30,93 +30,112 @@ class PlayerPicker(QMainWindow):
         self.search_input.setPlaceholderText("Search player by name...")
         self.search_input.setFixedHeight(70)
         self.search_input.setContentsMargins(10, 2, 10, 2)
-        self.search_input.textChanged.connect(self.filter_table)
+        self.search_input.textChanged.connect(self.refresh_tables)
         self.layout.addWidget(self.search_input)
 
-        self.selected_players_frame = QFrame(self)
-        self.selected_players_frame.setFrameShape(QFrame.StyledPanel)
-        self.layout.addWidget(self.selected_players_frame)
+        self.table_tabs = QTabWidget()
+        self.leaderboard_tab = QWidget()
+        self.selected_players_tab = QWidget()
 
-        self.selected_players_layout = QVBoxLayout(self.selected_players_frame)
+        self.leaderboard_table_layout = QVBoxLayout(self)
+        self.leaderboard_table = QTableWidget(self)
+        self.leaderboard_table.itemDoubleClicked.connect(self.on_table_clicked)
+        self.leaderboard_table_layout.addWidget(self.leaderboard_table)
 
-        self.table = QTableWidget(self)
-        self.table.itemDoubleClicked.connect(self.on_table_clicked)
-        self.selected_players_layout.addWidget(self.table)
+        self.selected_table_layout = QVBoxLayout(self)
+        self.selected_table = QTableWidget(self)
+        self.selected_table.itemDoubleClicked.connect(self.on_table_clicked)
+        self.selected_table_layout.addWidget(self.selected_table)
+
+        self.leaderboard_tab.setLayout(self.leaderboard_table_layout)
+        self.selected_players_tab.setLayout(self.selected_table_layout)
+
+        self.table_tabs.addTab(self.leaderboard_tab, "Leaderboard")
+        self.table_tabs.addTab(self.selected_players_tab, "Selected Players")
+        self.layout.addWidget(self.table_tabs)
 
         self.leaderboard = leaderboard
         self.players = self.leaderboard.get_players()
-        self.filtered_players = self.players  # Keep a filtered list
-        self.populate_table()
+        self.selected_players = selected_players
+        self.populate_table(table=self.leaderboard_table, players=self.players)
+        self.populate_table(table=self.selected_table, players=self.selected_players)
 
     def on_table_clicked(self, item):
         player_id = item.data(Qt.UserRole)
         self.on_select_callback(player_id)
 
-    def populate_table(self):
-        self.table.clearContents()
-        self.table.setRowCount(0)
-        self.table.setColumnCount(0)
+    def populate_table(self, table, players):
+        filtered_players = self.filter_players(players)
+        table.clearContents()
+        table.setRowCount(0)
+        table.setColumnCount(0)
 
         column_names = ["Name", "Score", "Rank", "MMR", "Power", "Wins", "Alias"]
-        self.table.setColumnCount(len(column_names))
-        self.table.setHorizontalHeaderLabels(column_names)
+        table.setColumnCount(len(column_names))
+        table.setHorizontalHeaderLabels(column_names)
 
-        header = self.table.horizontalHeader()
+        header = table.horizontalHeader()
         for i in range(len(column_names)):
             header.setSectionResizeMode(i, QHeaderView.ResizeMode.ResizeToContents)
         # stretch player names
         header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
 
-        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        table.setEditTriggers(QTableWidget.NoEditTriggers)
+        table.setSelectionBehavior(QTableWidget.SelectRows)
 
-        self.table.setRowCount(len(self.filtered_players))
+        table.setRowCount(len(filtered_players))
         max_metrics = self.leaderboard.max_metrics
         min_metrics = self.leaderboard.min_metrics
-        for row, player in enumerate(self.filtered_players):
-            self.table.setItem(row, 0, QTableWidgetItem(player.current_name))
+        for row, player in enumerate(filtered_players):
+            table.setItem(row, 0, QTableWidgetItem(player.current_name))
 
             score_widget = QTableWidgetItem(str(round(player.score, 2)))
             score_widget.setForeground(QBrush(QColor(player.color)))
-            self.table.setItem(row, 1, score_widget)
+            table.setItem(row, 1, score_widget)
 
             score_widget = QTableWidgetItem(str(round(player.current_metrics.world_rank, 2)))
             world_percent = 1 - float(player.current_metrics.world_rank) / min_metrics.world_rank
             score_widget.setForeground(QBrush(QColor(statics.calculate_color(world_percent))))
-            self.table.setItem(row, 2, score_widget)
+            table.setItem(row, 2, score_widget)
 
             score_widget = QTableWidgetItem(str(round(player.current_metrics.mmr, 2)))
             world_percent = float(player.current_metrics.mmr - min_metrics.mmr) / (max_metrics.mmr - min_metrics.mmr)
             score_widget.setForeground(QBrush(QColor(statics.calculate_color(world_percent))))
-            self.table.setItem(row, 3, score_widget)
+            table.setItem(row, 3, score_widget)
 
             score_widget = QTableWidgetItem(str(round(player.current_metrics.power, 2)))
             world_percent = float(player.current_metrics.power - min_metrics.power) / (
                     max_metrics.power - min_metrics.power)
             score_widget.setForeground(QBrush(QColor(statics.calculate_color(world_percent))))
-            self.table.setItem(row, 4, score_widget)
+            table.setItem(row, 4, score_widget)
 
             score_widget = QTableWidgetItem(str(round(player.max_metrics.total_wins, 2)))
             world_percent = float(player.current_metrics.total_wins - min_metrics.total_wins) / (
                     max_metrics.total_wins - min_metrics.total_wins)
             score_widget.setForeground(QBrush(QColor(statics.calculate_color(world_percent))))
-            self.table.setItem(row, 5, score_widget)
+            table.setItem(row, 5, score_widget)
 
-            self.table.setItem(row, 6, QTableWidgetItem(", ".join(player.aliases)))
+            table.setItem(row, 6, QTableWidgetItem(", ".join(player.aliases)))
 
         # Store player ID in table items
-        for row, player in enumerate(self.filtered_players):
+        for row, player in enumerate(filtered_players):
             for i in range(len(column_names)):
-                self.table.item(row, i).setData(Qt.UserRole, player.id)
+                table.item(row, i).setData(Qt.UserRole, player.id)
 
-        self.table.resizeColumnsToContents()
+        table.resizeColumnsToContents()
 
-    def filter_table(self):
+    def filter_players(self, players):
         search_text = self.search_input.text().strip().lower()
         if search_text:
-            self.filtered_players = [player for player in self.players if
-                                     search_text in player.current_name.lower() or any(
-                                         search_text in alias.lower() for alias in player.aliases)]
-        else:
-            self.filtered_players = self.players
-        self.populate_table()
+            return [player for player in players if
+                    search_text in player.current_name.lower() or any(
+                        search_text in alias.lower() for alias in player.aliases)]
+        return players
+
+    def refresh_tables(self):
+        self.populate_table(table=self.leaderboard_table, players=self.players)
+        self.populate_table(table=self.selected_table, players=self.selected_players)
+
+    def update_view(self, selected_players):
+        self.selected_players = sorted(selected_players, key=lambda p: p.score_rank)
+        self.populate_table(table=self.selected_table, players=self.selected_players)

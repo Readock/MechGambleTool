@@ -140,6 +140,7 @@ class WidgetToolBar(QMainWindow):
             self.picker_window = None
         else:
             self.picker_window = PlayerPicker(leaderboard=self.leaderboard,
+                                              selected_players=self.selected_players,
                                               on_select_callback=self.toggle_player_select)
             pywinstyles.apply_style(self.picker_window, "dark")
             self.picker_window.showNormal()
@@ -151,6 +152,8 @@ class WidgetToolBar(QMainWindow):
             self.selected_players.append(self.leaderboard.get_player(player_id))
         if self.player_chart_window:
             self.player_chart_window.update_view(selected_players=self.selected_players)
+        if self.picker_window:
+            self.picker_window.update_view(selected_players=self.selected_players)
 
     def detect_player(self):
         self.selected_players = self.detector_service.detect_player(self.leaderboard)

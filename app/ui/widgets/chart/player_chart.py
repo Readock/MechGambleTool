@@ -40,14 +40,8 @@ class PlayerChart(QMainWindow):
 
         self.selected_players_layout = QVBoxLayout(self.selected_players_frame)
 
-        self.table = QTableWidget(self)
-        self.table.itemDoubleClicked.connect(self.on_table_clicked)
-        self.selected_players_layout.addWidget(self.table)
-
         self.leaderboard = leaderboard
         self.selected_players = selected_players
-
-        self.populate_table()
 
         self.figure = plt.Figure(figsize=(6, 4))
         self.canvas = FigureCanvasQTAgg(self.figure)
@@ -77,7 +71,7 @@ class PlayerChart(QMainWindow):
 
     def update_view(self, selected_players):
         self.selected_players = sorted(selected_players, key=lambda p: p.score_rank)
-        self.populate_table()
+        # self.populate_table()
         self.populate_plot()
 
     def populate_table(self):
