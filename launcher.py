@@ -73,7 +73,7 @@ def find_exe_in_folder(folder: Path):
 
 def launch_exe(exe_path: Path):
     print(f"Launching {exe_path}")
-    subprocess.Popen([str(exe_path)], shell=True)
+    subprocess.Popen([str(exe_path)])
 
 
 def ask_should_update(current, next, url):
@@ -106,27 +106,22 @@ def main():
         if local_folder:
             exe_path = find_exe_in_folder(local_folder)
             launch_exe(exe_path)
-        sys.exit(1)
+        return
 
     print(f"Downloading v{latest_version} version from: {zip_url}")
     new_folder = download_and_extract_zip(zip_url, latest_version)
     exe_path = find_exe_in_folder(new_folder)
     print(f"Downloaded successfully!")
 
-    print(f"Copy settings to new version...")
-    for file in ["records.json", "settings.json", "screen_coords.json", "recent_bets.json"]:
-        try:
-            shutil.copy(local_folder / file, new_folder / file)
-            print(f"Copied {file} successfully!")
-        except FileNotFoundError:
-            print(f"Expected {file} not found!")
-            continue
+    print(f"Deleting current resource folder...")
+    shutil.rmtree("resources", ignore_errors=True)
+    print(f"Copy new resource folder...")
+    shutil.copytree(local_folder / "resources", "resources", dirs_exist_ok=True)
 
     launch_exe(exe_path)
 
     print(f"Deleting old versions...")
     clean_old_versions(Path(f"v{latest_version}"))
-    sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -140,3 +135,4 @@ if __name__ == "__main__":
 ========================== MechGabmleTool - Launcher ===========================
     """)
     main()
+    sys.exit(0)
