@@ -30,7 +30,7 @@ class Gambler(QMainWindow):
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
 
         self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
-        self.setWindowTitle("MechGambleTool")
+        self.setWindowTitle("Gamble")
 
         # main window
         self.main_widget = QWidget(self)

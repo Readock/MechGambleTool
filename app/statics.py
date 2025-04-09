@@ -1,7 +1,7 @@
 import win32gui
 from PyQt5.QtGui import QColor
 import sys
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMessageBox, QMainWindow
 
 
 class RelativeScreenWindowTransformResult:
@@ -27,6 +27,10 @@ def calculate_color(percentage: float):
     green_hue = 100.0 / 360.0
     hue = percentage * green_hue
     return QColor.fromHsvF(hue, 1 - 0.5 * hue, 1 - 0.5 * hue).name()
+
+
+def is_window_active(window: QMainWindow):
+    return window and window.isVisible() and not window.isMinimized()
 
 
 def show_error(message, exitApp=False):
