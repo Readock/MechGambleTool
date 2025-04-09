@@ -12,7 +12,7 @@ class PlayerPicker(QMainWindow):
         self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         self.on_select_callback = on_select_callback
 
-        transform = statics.relative_screen_window_transform(600, 500, 0.8, 0.99)
+        transform = statics.relative_screen_window_transform(600, 700, 0.8, 0.99)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
 
         self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
