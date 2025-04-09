@@ -116,7 +116,7 @@ def main():
     print(f"Deleting current resource folder...")
     shutil.rmtree("resources", ignore_errors=True)
     print(f"Copy new resource folder...")
-    shutil.copytree(local_folder / "resources", "resources", dirs_exist_ok=True)
+    shutil.copytree(new_folder / "resources", "resources", dirs_exist_ok=True)
 
     launch_exe(exe_path)
 
