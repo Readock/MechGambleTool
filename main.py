@@ -18,7 +18,7 @@ from app.configuration import settings
 from app.configuration.settings_gui import SettingsUI
 
 from app.ui.widgets.gambling.gambler import Gambler
-from app.ui.tool_widget import ToolWidget, ToolWidgetButtonDefinition
+from app.ui.widget_tool_bar import WidgetToolBar, ToolWidgetButtonDefinition
 
 from app.ui.widgets.leaderboard.picker import PlayerPicker
 from app.player_detector import PlayerDetector
@@ -79,7 +79,7 @@ class Window(QMainWindow):
         self.picker_window = None
         self.settings_window = None
 
-        self.tool_widget = ToolWidget(tool_buttons=[
+        self.tool_widget = WidgetToolBar(tool_buttons=[
             ToolWidgetButtonDefinition(
                 icon_name="fa6s.ticket",
                 tooltip="Gamble",
