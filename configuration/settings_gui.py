@@ -23,7 +23,7 @@ class SettingsUI(QWidget):
         transform = statics.relative_screen_window_transform(650, 200, 0.5, 0.5)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
 
-        self.setWindowIcon(QIcon("../resources/w0BJbj40_400x400.jpg"))
+        self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
         self.setWindowTitle("Settings Editor")
 
         self.settings = settings.get_settings()
