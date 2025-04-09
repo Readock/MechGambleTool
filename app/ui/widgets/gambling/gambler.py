@@ -47,7 +47,43 @@ class Gambler(QMainWindow):
 
         # UI-Elemente
         bet_blue = QPushButton("Blue")
+        bet_blue.setStyleSheet("""
+            QPushButton {
+                color: rgba(255, 128, 128, 1);
+                font-weight:bold;
+                border: none;
+                background-color: rgba(224, 29, 29, 0.5);
+            }
+            QPushButton:hover {
+                color: white;
+                background-color: rgba(224, 29, 29, 0.8);
+            }
+            QPushButton:pressed {
+                background-color: #505050;
+            }
+            QPushButton:focus {
+                outline: none;
+            }
+        """)
         bet_red = QPushButton("Red")
+        bet_red.setStyleSheet("""
+            QPushButton {
+                color: rgba(112, 204, 224, 1);
+                font-weight:bold;
+                border: none;
+                background-color: rgba(29, 141, 222, 0.5);
+            }
+            QPushButton:hover {
+                color: white;
+                background-color: rgba(29, 141, 222, 0.8);
+            }
+            QPushButton:pressed {
+                background-color: #505050;
+            }
+            QPushButton:focus {
+                outline: none;
+            }
+        """)
         self.bet_amount = QLineEdit()
 
         tabs = QTabWidget()
