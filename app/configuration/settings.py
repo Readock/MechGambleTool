@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 from app import statics
-from app.leaderboard import Leaderboard, PlayerRecord, MetricDataPoint
+from app.leaderboard.leaderboard import Leaderboard, PlayerRecord, MetricDataPoint
 
 RECORDS_FILE = "records.json"
 SETTINGS_FILE = "settings.json"

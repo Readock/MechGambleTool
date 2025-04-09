@@ -1,5 +1,5 @@
 from app.configuration import settings
-from app.log_importer import extract_leaderboard_data
+from app.leaderboard.log_importer import extract_leaderboard_data
 
 
 def load_leaderboard():

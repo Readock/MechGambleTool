@@ -11,8 +11,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 
 from app.configuration import settings
-from app.gambling import GambleScreenCoords
-from app.gambling.GambleScreenCoords import CoordCollector, bet_team_blue, bet_team_red
+from app.ui.widgets.gambling import GambleScreenCoords
+from app.ui.widgets.gambling.GambleScreenCoords import CoordCollector, bet_team_blue, bet_team_red
 
 DATA_FILE = "recent_bets.json"
 MAX_BUTTONS = 5

@@ -14,7 +14,7 @@ class ToolWidgetButtonDefinition:
         self.is_detect_button = is_detect_button
 
 
-class ToolWidget(QMainWindow):
+class WidgetToolBar(QMainWindow):
     def __init__(self, parent=None, tool_buttons=None):
         super().__init__(parent=parent)
         if tool_buttons is None:

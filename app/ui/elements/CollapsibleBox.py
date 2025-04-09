@@ -3,6 +3,7 @@
 )
 from PyQt5.QtCore import Qt
 
+
 class CollapsibleBox(QWidget):
     def __init__(self, title="", parent=None):
         super().__init__(parent)

@@ -12,14 +12,15 @@ from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeade
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 import threading
 
-from app import statics, leaderboard_manager
+from app import statics
+from app.leaderboard import leaderboard_manager
 from app.configuration import settings
 from app.configuration.settings_gui import SettingsUI
 
-from app.gambling.gambler import Gambler
-from app.tool_widget import ToolWidget, ToolWidgetButtonDefinition
+from app.ui.widgets.gambling.gambler import Gambler
+from app.ui.tool_widget import ToolWidget, ToolWidgetButtonDefinition
 
-from app.picker import PlayerPicker
+from app.ui.widgets.leaderboard.picker import PlayerPicker
 from app.player_detector import PlayerDetector
 
 

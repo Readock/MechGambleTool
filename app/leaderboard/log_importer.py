@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 from app import statics
-from app.leaderboard import Leaderboard, PlayerRecord, MetricDataPoint
+from app.leaderboard.leaderboard import Leaderboard, PlayerRecord, MetricDataPoint
 
 
 def extract_leaderboard_data(log_folder):
