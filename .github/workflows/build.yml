@@ -20,11 +20,11 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
-      - name: Read properties from build.properties
+      - name: Read properties from app.properties
         id: props
         shell: pwsh
         run: |
-          $props = Get-Content build.properties | ForEach-Object {
+          $props = Get-Content app.properties | ForEach-Object {
             $parts = $_ -split '='
             [PSCustomObject]@{ Key = $parts[0]; Value = $parts[1] }
           }
@@ -37,7 +37,12 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build with PyInstaller
+      - name: Build launcher with PyInstaller
+        run: |
+          pyinstaller -F --icon=resources/w0BJbj40_400x400.jpg launcher.py
+          Copy-Item -Path dist\launcher.exe -Destination launcher.exe
+
+      - name: Build app with PyInstaller
         run: |
           pyinstaller --noconsole --windowed --icon=resources/w0BJbj40_400x400.jpg main.py
           Rename-Item -Path dist\main\main.exe -NewName "${{ env.name }}.exe"
@@ -52,6 +57,8 @@ jobs:
           tag_name: v${{ env.version }}+${{ github.run_number }}
           name: "${{ env.name }} v${{ env.version }}+${{ github.run_number }}"
           draft: false
-          files: "${{ env.name }}.zip"
+          files: |
+            ${{ env.name }}.zip
+            launcher.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
