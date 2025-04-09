@@ -1,5 +1,7 @@
 import os
 import re
+import sys
+
 import requests
 import zipfile
 import shutil
@@ -123,6 +125,8 @@ def main():
         prompt_restart()
 
     clean_old_versions(Path(f"v{latest_version}"))
+    prompt_update(local_version, latest_version, zip_url)
+    sys.exit(1)  # Exit the application
 
 
 if __name__ == "__main__":
