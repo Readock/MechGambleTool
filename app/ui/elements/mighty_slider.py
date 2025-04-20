@@ -19,14 +19,14 @@ class MightyGambleSlider(QSlider):
         self.setTickPosition(QSlider.TicksBelow)
         self.label_step = label_step
 
-    def mouseReleaseEvent(self, event):
-        super().mouseReleaseEvent(event)
-
+    def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             event.accept()
             x = event.pos().x()
             value = (self.maximum() - self.minimum()) * x / self.width() + self.minimum()
             self.sliderBarClicked.emit(int(value))
+
+        super().mousePressEvent(event)
 
     def paintEvent(self, event):
         super().paintEvent(event)
