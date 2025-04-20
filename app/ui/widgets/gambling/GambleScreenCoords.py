@@ -1,14 +1,16 @@
-﻿import os
+﻿import json
+import os
+import time
 import tkinter as tk
 from tkinter import Canvas
+
 import pyautogui
-import time
-import json
 
 from app.configuration import settings
 
-COORD_LABELS = ['join_bet', 'blue_team','slider_200' , 'slider_1', 'confirm', 'close_window']
+COORD_LABELS = ['join_bet', 'blue_team', 'slider_200', 'slider_1', 'confirm', 'close_window']
 coords_file = "screen_coords.json"
+
 
 def load_coords_from_json(filename=coords_file):
     if not os.path.exists(filename):
@@ -31,12 +33,14 @@ def click_blue_team():
     coords = load_coords_from_json()
     simulate_click(*coords['blue_team'])
 
+
 def click_red_team():
     screen_width, _ = pyautogui.size()
     coords = load_coords_from_json()
     x, y = coords['blue_team']
     mirrored_x = screen_width - x
     simulate_click(mirrored_x, y)
+
 
 def click_slider_at(value):
     if not (1 <= value <= 200):
@@ -55,13 +59,16 @@ def click_slider_at(value):
 
     simulate_click(int(x), int(y))
 
+
 def click_confirm():
     coords = load_coords_from_json()
     simulate_click(*coords['confirm'])
 
+
 def click_close():
     coords = load_coords_from_json()
     simulate_click(*coords['close_window'])
+
 
 def bet_team_blue(value):
     click_delay = float(settings.get_settings().click_delay)
@@ -75,6 +82,7 @@ def bet_team_blue(value):
     click_confirm()
     time.sleep(click_delay)
     click_close()
+
 
 def bet_team_red(value):
     click_delay = float(settings.get_settings().click_delay)
@@ -96,7 +104,7 @@ class CoordCollector:
         self.root.attributes("-fullscreen", True)
         self.root.attributes("-topmost", True)
         self.root.attributes("-alpha", 0.5)  # Semi-transparent overlay
-        self.root.configure(bg='gray')       # Solid color for background
+        self.root.configure(bg='gray')  # Solid color for background
         self.root.overrideredirect(True)
         self.root.withdraw()  # Start hidden
 
@@ -109,7 +117,8 @@ class CoordCollector:
         self.click_enabled = True
 
         # Label at the top-left to show which coordinate is being set
-        self.info_label = tk.Label(self.root, text="Setting coordinate...", fg="white", bg="gray", font=("Arial", 33, "bold"))
+        self.info_label = tk.Label(self.root, text="Setting coordinate...", fg="white", bg="gray",
+                                   font=("Arial", 33, "bold"))
         self.info_label.place(x=20, y=20)
 
         self.canvas.bind("<ButtonRelease-1>", self.on_click)
@@ -172,6 +181,7 @@ class CoordCollector:
         with open(coords_file, 'w') as f:
             json.dump(self.coords, f, indent=4)
         self.root.destroy()
+
 
 if __name__ == "__main__":
     bet_team_blue(1)

@@ -32,7 +32,7 @@ class MightyGambleSlider(QSlider):
         super().paintEvent(event)
 
         painter = QPainter(self)
-        painter.setPen(QColor(55, 55, 55))
+        painter.setPen(QColor(65, 65, 65))
 
         self.add_label_to_value(painter, self.minimum())
         # Draw labels every label_step
