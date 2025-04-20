@@ -165,23 +165,6 @@ class Gambler(QMainWindow):
         self.player_score_progress_bar.setContentsMargins(0, 0, 0, 2)  # No outer margin
         stats_layout.addWidget(self.player_score_progress_bar)
 
-        self.player_mmr_progress_bar = QProgressBar(self)
-        self.player_mmr_progress_bar.setRange(0, 100)
-        self.player_mmr_progress_bar.setStyleSheet("""
-            QProgressBar {
-                background-color: rgba(224, 29, 29, 0.5);
-                border: 0
-            }
-            QProgressBar::chunk { 
-                background-color: rgba(29, 141, 222, 0.8);
-                border: 0
-            }
-        """)
-        self.player_mmr_progress_bar.setTextVisible(False)
-        self.player_mmr_progress_bar.setRange(0, 100)
-        self.player_mmr_progress_bar.setMaximumHeight(4)
-        stats_layout.addWidget(self.player_mmr_progress_bar)
-
         self.warning_label = QLineEdit()
         self.warning_label.setText("⚠ Current selected player stats are not up-to-date and might be invalid")
         self.warning_label.setVisible(False)
@@ -235,14 +218,10 @@ class Gambler(QMainWindow):
         self.warning_label.setVisible(StateManager.instance().has_selection_warnings())
         if StateManager.instance().has_selected_players():
             self.player_score_progress_bar.setVisible(True)
-            self.player_mmr_progress_bar.setVisible(True)
             ratio = int(StateManager.instance().player_score_ratio() * 100)
             self.player_score_progress_bar.setValue(ratio)
-            ratio = int(StateManager.instance().player_mmr_ratio() * 100)
-            self.player_mmr_progress_bar.setValue(ratio)
         else:
             self.player_score_progress_bar.setVisible(False)
-            self.player_mmr_progress_bar.setVisible(False)
 
     def add_to_bet_amount(self, delta):
         self.update_text_field(self.get_bet_amount() + delta)
