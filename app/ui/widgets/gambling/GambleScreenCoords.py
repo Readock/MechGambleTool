@@ -6,6 +6,7 @@ from tkinter import Canvas
 
 import pyautogui
 
+from app import statics
 from app.configuration import settings
 
 COORD_LABELS = ['join_bet', 'blue_team', 'slider_200', 'slider_1', 'confirm', 'close_window']
@@ -14,7 +15,8 @@ coords_file = "screen_coords.json"
 
 def load_coords_from_json(filename=coords_file):
     if not os.path.exists(filename):
-        raise FileNotFoundError("Coordinate file not found. Please run calibration first.")
+        statics.show_error("Coordinate file not found. Please run calibration first.", True)
+        raise FileNotFoundError()
     with open(filename, 'r') as f:
         return json.load(f)
 

@@ -10,6 +10,7 @@ import threading
 
 from app.leaderboard import leaderboard_manager
 from app.service.player_detector import PlayerDetector
+from app.service.state_manager import StateManager
 from app.ui.widget_tool_bar import WidgetToolBar
 
 
@@ -23,7 +24,9 @@ class App(QApplication):
         self.detector = PlayerDetector()
         self.detector.ready.connect(self.on_detector_ready)
 
+        # TODO: make leaderboard a singleton
         self.leaderboard = leaderboard_manager.load_leaderboard()
+        self.state_manager = StateManager.init(leaderboard=self.leaderboard)
         self.widget_tool_bar = WidgetToolBar(application=self, leaderboard=self.leaderboard)
         # pywinstyles.apply_style(demo, "aero")
         pywinstyles.apply_style(self.widget_tool_bar, "dark")

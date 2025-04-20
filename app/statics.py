@@ -33,6 +33,10 @@ def is_window_active(window: QMainWindow):
     return window and window.isVisible() and not window.isMinimized()
 
 
+def clamp(value, min_value, max_value):
+    return max(min_value, min(value, max_value))
+
+
 def show_error(message, exitApp=False):
     app = QApplication(sys.argv)
     msg_box = QMessageBox()

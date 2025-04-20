@@ -7,9 +7,11 @@ from app import statics
 from app.configuration import settings
 import numpy as np
 
+from app.service.state_manager import StateManager
+
 
 class PlayerPicker(QMainWindow):
-    def __init__(self, parent=None, on_select_callback=None, leaderboard=None, selected_players=None):
+    def __init__(self, parent=None, on_select_callback=None, leaderboard=None):
         super().__init__(parent=parent)
         self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         self.on_select_callback = on_select_callback
@@ -59,9 +61,8 @@ class PlayerPicker(QMainWindow):
 
         self.leaderboard = leaderboard
         self.players = self.leaderboard.get_players()
-        self.selected_players = selected_players
         self.populate_table(table=self.leaderboard_table, players=self.players)
-        self.populate_table(table=self.selected_table, players=self.selected_players)
+        self.populate_table(table=self.selected_table, players=StateManager.instance().selected_players)
 
     def on_table_clicked(self, item):
         player_id = item.data(Qt.UserRole)
@@ -137,8 +138,7 @@ class PlayerPicker(QMainWindow):
 
     def refresh_tables(self):
         self.populate_table(table=self.leaderboard_table, players=self.players)
-        self.populate_table(table=self.selected_table, players=self.selected_players)
+        self.populate_table(table=self.selected_table, players=StateManager.instance().selected_players)
 
-    def update_view(self, selected_players):
-        self.selected_players = sorted(selected_players, key=lambda p: p.score_rank)
-        self.populate_table(table=self.selected_table, players=self.selected_players)
+    def update_view(self):
+        self.populate_table(table=self.selected_table, players=StateManager.instance().selected_players)

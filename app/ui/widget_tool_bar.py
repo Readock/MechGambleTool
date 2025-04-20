@@ -10,6 +10,7 @@ from app import statics
 from app.configuration import settings
 from app.configuration.settings_gui import SettingsUI
 from app.service.player_detector import PlayerDetector
+from app.service.state_manager import StateManager
 from app.ui.widgets.chart.player_chart import PlayerChart
 from app.ui.widgets.gambling.gambler import Gambler
 from app.ui.widgets.leaderboard.picker import PlayerPicker
@@ -29,7 +30,6 @@ class WidgetToolBar(QMainWindow):
         super().__init__(parent=parent)
         self.application = application
         self.leaderboard = leaderboard
-        self.selected_players = []
 
         self.setWindowFlags(
             Qt.Window | Qt.WindowStaysOnTopHint | Qt.CustomizeWindowHint | Qt.WindowType.FramelessWindowHint)
@@ -139,25 +139,28 @@ class WidgetToolBar(QMainWindow):
             self.picker_window = None
         else:
             self.picker_window = PlayerPicker(leaderboard=self.leaderboard,
-                                              selected_players=self.selected_players,
                                               on_select_callback=self.toggle_player_select)
             pywinstyles.apply_style(self.picker_window, "dark")
             self.picker_window.showNormal()
 
     def toggle_player_select(self, player_id):
-        if any(player_id == p.id for p in self.selected_players):
-            self.selected_players[:] = [player for player in self.selected_players if player.id != player_id]
+        if any(player_id == p.id for p in StateManager.instance().selected_players):
+            StateManager.instance().unselect_player(player_id)
         else:
-            self.selected_players.append(self.leaderboard.get_player(player_id))
+            StateManager.instance().select_players([self.leaderboard.get_player(player_id)])
+        self.update_views()
+
+    def update_views(self):
         if self.player_chart_window:
-            self.player_chart_window.update_view(selected_players=self.selected_players)
+            self.player_chart_window.update_view()
         if self.picker_window:
-            self.picker_window.update_view(selected_players=self.selected_players)
+            self.picker_window.update_view()
+        if self.gamble_window:
+            self.gamble_window.update_view()
 
     def detect_player(self):
-        self.selected_players = self.detector_service.detect_player(self.leaderboard)
-        if self.player_chart_window:
-            self.player_chart_window.update_view(self.selected_players)
+        self.detector_service.detect_player(self.leaderboard)
+        self.update_views()
 
     def gamble(self):
         if statics.is_window_active(self.gamble_window):
@@ -173,7 +176,7 @@ class WidgetToolBar(QMainWindow):
             self.player_chart_window.close()
             self.player_chart_window = None
         else:
-            self.player_chart_window = PlayerChart(leaderboard=self.leaderboard, selected_players=self.selected_players)
+            self.player_chart_window = PlayerChart(leaderboard=self.leaderboard)
             pywinstyles.apply_style(self.player_chart_window, "dark")
             self.player_chart_window.showNormal()
 

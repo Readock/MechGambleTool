@@ -1,19 +1,19 @@
-import matplotlib.pyplot as plt
 import matplotlib
-import pywinstyles
-from PyQt5.QtCore import Qt, QEvent, QPoint
-from PyQt5.QtGui import QIcon, QColor, QBrush, QPixmap
-from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QWidget, \
+import matplotlib.pyplot as plt
+from PyQt5.QtCore import Qt, QEvent
+from PyQt5.QtGui import QIcon, QColor, QBrush
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QFrame, QVBoxLayout, QWidget, \
     QMainWindow
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 
 from app import statics
 from app.configuration import settings
+from app.service.state_manager import StateManager
 
 
 class PlayerChart(QMainWindow):
 
-    def __init__(self, parent=None, leaderboard=None, selected_players=None):
+    def __init__(self, parent=None, leaderboard=None):
         super().__init__(parent=parent)
 
         # self.setWindowFlags(
@@ -43,7 +43,6 @@ class PlayerChart(QMainWindow):
         self.selected_players_layout = QVBoxLayout(self.selected_players_frame)
 
         self.leaderboard = leaderboard
-        self.selected_players = selected_players
 
         self.figure = plt.Figure(figsize=(6, 4))
         self.canvas = FigureCanvasQTAgg(self.figure)
@@ -60,20 +59,7 @@ class PlayerChart(QMainWindow):
         self.figure.tight_layout()
         self.showMinimized()
 
-    def on_table_clicked(self, item):
-        player_id = item.data(Qt.UserRole)
-        self.toggle_player_select(player_id)
-
-    def toggle_player_select(self, player_id):
-        if any(player_id == p.id for p in self.selected_players):
-            self.selected_players[:] = [player for player in self.selected_players if player.id != player_id]
-        else:
-            self.selected_players.append(self.leaderboard.get_player(player_id))
-        # self.update_view()
-
-    def update_view(self, selected_players):
-        self.selected_players = sorted(selected_players, key=lambda p: p.score_rank)
-        # self.populate_table()
+    def update_view(self):
         self.populate_plot()
 
     def populate_table(self):
@@ -92,10 +78,10 @@ class PlayerChart(QMainWindow):
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
 
-        self.table.setRowCount(len(self.selected_players))
+        self.table.setRowCount(len(StateManager.instance().selected_players))
         max_metrics = self.leaderboard.max_metrics
         min_metrics = self.leaderboard.min_metrics
-        for row, player in enumerate(self.selected_players):
+        for row, player in enumerate(StateManager.instance().selected_players):
             self.table.setItem(row, 0, QTableWidgetItem(player.current_name))
 
             score_widget = QTableWidgetItem(str(round(player.score, 2)))
@@ -127,7 +113,7 @@ class PlayerChart(QMainWindow):
             self.table.setItem(row, 6, QTableWidgetItem(", ".join(player.aliases)))
 
         # set player id as data for each table cell
-        for row, player in enumerate(self.selected_players):
+        for row, player in enumerate(StateManager.instance().selected_players):
             for i in range(0, len(column_names)):
                 self.table.item(row, i).setData(Qt.UserRole, player.id)
 
@@ -140,7 +126,7 @@ class PlayerChart(QMainWindow):
         handles = []
         labels = []
 
-        for player in self.selected_players:
+        for player in StateManager.instance().selected_players:
             # Create a dictionary of timestamp → mmr values
             timestamp_to_mmr = {record.timestamp: record.metrics.mmr for record in player.records}
 

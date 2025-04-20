@@ -31,6 +31,7 @@ class PlayerStats:
         self.score = None
         self.score_rank = None
         self.color = "red"
+        self.is_top_player = False
 
     def update_metrics(self):
         self.records.sort(key=lambda r: r.timestamp)
@@ -63,12 +64,17 @@ class PlayerStats:
         if last_timestamp != self.records[-1].timestamp:
             self.score = self.score - 10  # outside top 200 so should have a negative score
 
+    def was_top_player(self, timestamp):
+        return any(r.timestamp == timestamp for r in self.records)
+
 
 class Leaderboard:
     def __init__(self):
-        self.players = {}
+        self.players: [PlayerRecord] = {}
         self.max_metrics = MetricDataPoint(0, 0, 1, 0)
         self.min_metrics = MetricDataPoint(0, 0, 1, 0)
+        self.max_score = 0
+        self.min_score = 0
         self.last_timestamp = None
         self.timestamps = []
 
@@ -78,8 +84,8 @@ class Leaderboard:
         else:
             self.players[record.id] = PlayerStats(record)
 
-    def get_player(self, id):
-        return self.players.get(id, None)
+    def get_player(self, player_id):
+        return self.players.get(player_id, None)
 
     def get_players(self):
         if any(player.score is None for player in self.players.values()):
@@ -108,9 +114,15 @@ class Leaderboard:
 
         for player in self.players.values():
             player.calculate_score(self.max_metrics, self.last_timestamp)
+            player.is_top_player = player.was_top_player(self.last_timestamp)
 
         sorted_players = sorted(self.players.values(), key=lambda p: p.score, reverse=True)
 
         for score_rank, player in enumerate(sorted_players, start=1):
             player.score_rank = score_rank
             player.color = calculate_color(1 - float(score_rank) / len(sorted_players))
+
+        self.max_score = max(p.score for p in self.players.values()),
+        self.min_score = min(
+            p.score for p in self.players.values() if p.was_top_player(self.last_timestamp)
+        )

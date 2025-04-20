@@ -1,12 +1,16 @@
-from PIL import ImageGrab
 import asyncio
+from typing import List
+
+import cv2
+import numpy as np
+from PIL import ImageGrab
+from PyQt5.QtCore import QObject, pyqtSignal
+from fuzzywuzzy import fuzz
+
 from app import statics
 from app.configuration import settings
 from app.leaderboard.leaderboard import Leaderboard
-from fuzzywuzzy import fuzz
-from PyQt5.QtCore import QObject, pyqtSignal
-import cv2
-import numpy as np
+from app.service.state_manager import StateManager
 
 
 def is_fuzzy_match(target, candidates):
@@ -19,6 +23,13 @@ def to_maked_image(image):
     upper_bound_white = np.array([255, 255, 255], dtype=np.uint8)
     white_mask = cv2.inRange(np.array(image.convert("RGB")), lower_bound_white, upper_bound_white)
     return cv2.cvtColor(white_mask, cv2.COLOR_GRAY2BGR)
+
+
+class ScreenReadResult(QObject):
+    def __init__(self, left, right):
+        super().__init__()
+        self.left: List[str] = left
+        self.right: List[str] = right
 
 
 class PlayerDetector(QObject):
@@ -38,7 +49,14 @@ class PlayerDetector(QObject):
         if self.reader is None:
             statics.show_error("Something went with setting up easyocr!")
             return []
-        names = self.read_names_from_screen()
+        read_result = self.read_names_from_screen()
+        l_matches = self.resolve_read_to_players(read_result.left, leaderboard)
+        r_matches = self.resolve_read_to_players(read_result.right, leaderboard)
+        StateManager.instance().reset_selected_players()
+        StateManager.instance().select_players(left=l_matches, right=r_matches)
+
+    @staticmethod
+    def resolve_read_to_players(names, leaderboard: Leaderboard):
         matches = []
         for player in leaderboard.get_players():
             if is_fuzzy_match(player.current_name, names) or any(
@@ -77,4 +95,4 @@ class PlayerDetector(QObject):
         right_result = self.reader.readtext(right_path, detail=0)
         print("Detected text left: " + ', '.join(left_result))
         print("Detected text right: " + ', '.join(right_result))
-        return left_result + right_result
+        return ScreenReadResult(left=left_result, right=right_result)

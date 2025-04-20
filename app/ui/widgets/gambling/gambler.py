@@ -5,11 +5,12 @@ import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QMainWindow, QTabWidget, QSlider
+    QWidget, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QMainWindow, QTabWidget, QSlider, QProgressBar
 )
 
 from app import statics
 from app.configuration import settings
+from app.service.state_manager import StateManager
 from app.ui.elements.mighty_slider import MightyGambleSlider
 from app.ui.widgets.gambling import GambleScreenCoords
 from app.ui.widgets.gambling.GambleScreenCoords import CoordCollector, bet_team_blue, bet_team_red
@@ -51,8 +52,8 @@ class Gambler(QMainWindow):
         bottom_layout = QHBoxLayout()
 
         # UI-Elemente
-        bet_blue = QPushButton("Blue")
-        bet_blue.setStyleSheet("""
+        self.bet_blue = QPushButton("Blue")
+        self.bet_blue.setStyleSheet("""
             QPushButton {
                 color: rgba(112, 204, 224, 1);
                 font-weight:bold;
@@ -70,8 +71,8 @@ class Gambler(QMainWindow):
                 outline: none;
             }
         """)
-        bet_red = QPushButton("Red")
-        bet_red.setStyleSheet("""
+        self.bet_red = QPushButton("Red")
+        self.bet_red.setStyleSheet("""
             QPushButton {
                 color: rgba(255, 128, 128, 1);
                 font-weight:bold;
@@ -112,8 +113,8 @@ class Gambler(QMainWindow):
         self.slider.setTracking(True)
 
         # Größe der Elemente
-        bet_blue.setFixedSize(120, 60)
-        bet_red.setFixedSize(120, 60)
+        self.bet_blue.setFixedSize(120, 60)
+        self.bet_red.setFixedSize(120, 60)
         # self.bet_amount.setFixedSize(120, 40)
 
         self.slider.setFixedHeight(40)
@@ -126,8 +127,8 @@ class Gambler(QMainWindow):
         self.slider.valueChanged.connect(lambda v: self.update_text_field(v, prevent_signal=True))
         self.bet_amount.textChanged.connect(self.update_slider_from_text)
 
-        bet_blue.clicked.connect(self.handle_team_blue_clicked)
-        bet_red.clicked.connect(self.handle_team_red_clicked)
+        self.bet_blue.clicked.connect(self.handle_team_blue_clicked)
+        self.bet_red.clicked.connect(self.handle_team_red_clicked)
         self.recalibrate.clicked.connect(self.calibrate)
 
         self.decrease_button = QPushButton("-")
@@ -139,11 +140,52 @@ class Gambler(QMainWindow):
         self.increase_button.clicked.connect(lambda: self.add_to_bet_amount(1))
 
         # Anordnung
-        top_layout.addWidget(bet_blue, alignment=Qt.AlignLeft)
+        top_layout.addWidget(self.bet_blue, alignment=Qt.AlignLeft)
         top_layout.addWidget(self.decrease_button, alignment=Qt.AlignCenter)
         top_layout.addWidget(self.bet_amount, alignment=Qt.AlignCenter)
         top_layout.addWidget(self.increase_button, alignment=Qt.AlignCenter)
-        top_layout.addWidget(bet_red, alignment=Qt.AlignRight)
+        top_layout.addWidget(self.bet_red, alignment=Qt.AlignRight)
+
+        stats_layout = QVBoxLayout()
+        self.player_score_progress_bar = QProgressBar(self)
+        self.player_score_progress_bar.setRange(0, 100)
+        self.player_score_progress_bar.setStyleSheet("""
+            QProgressBar {
+                background-color: rgba(224, 29, 29, 0.5);
+                border: 0
+            }
+            QProgressBar::chunk { 
+                background-color: rgba(29, 141, 222, 0.8);
+                border: 0
+            }
+        """)
+        self.player_score_progress_bar.setTextVisible(False)
+        self.player_score_progress_bar.setRange(0, 100)
+        self.player_score_progress_bar.setMaximumHeight(4)
+        self.player_score_progress_bar.setContentsMargins(0, 0, 0, 2)  # No outer margin
+        stats_layout.addWidget(self.player_score_progress_bar)
+
+        self.player_mmr_progress_bar = QProgressBar(self)
+        self.player_mmr_progress_bar.setRange(0, 100)
+        self.player_mmr_progress_bar.setStyleSheet("""
+            QProgressBar {
+                background-color: rgba(224, 29, 29, 0.5);
+                border: 0
+            }
+            QProgressBar::chunk { 
+                background-color: rgba(29, 141, 222, 0.8);
+                border: 0
+            }
+        """)
+        self.player_mmr_progress_bar.setTextVisible(False)
+        self.player_mmr_progress_bar.setRange(0, 100)
+        self.player_mmr_progress_bar.setMaximumHeight(4)
+        stats_layout.addWidget(self.player_mmr_progress_bar)
+
+        self.warning_label = QLineEdit()
+        self.warning_label.setText("⚠ Current selected player stats are not up-to-date and might be invalid")
+        self.warning_label.setVisible(False)
+        stats_layout.addWidget(self.warning_label)
 
         favorite_tab.setLayout(self.favourite_buttons_layout)
         recent_tab.setLayout(self.recent_buttons_layout)
@@ -166,6 +208,7 @@ class Gambler(QMainWindow):
 
         bottom_layout.addWidget(self.recalibrate, alignment=Qt.AlignBottom)
 
+        main_layout.addLayout(stats_layout)
         main_layout.addLayout(top_layout)
         main_layout.addWidget(tabs)
         main_layout.addLayout(progress_layout)
@@ -181,14 +224,34 @@ class Gambler(QMainWindow):
         self.recent_buttons = []
         self.load_recent_buttons()
         self.load_favorite_buttons()
+        self.update_player_score_states()
+
+    def update_view(self):
+        self.update_player_score_states()
+
+    def update_player_score_states(self):
+        self.bet_blue.setText(StateManager.instance().left_name())
+        self.bet_red.setText(StateManager.instance().right_name())
+        self.warning_label.setVisible(StateManager.instance().has_selection_warnings())
+        if StateManager.instance().has_selected_players():
+            self.player_score_progress_bar.setVisible(True)
+            self.player_mmr_progress_bar.setVisible(True)
+            ratio = int(StateManager.instance().player_score_ratio() * 100)
+            self.player_score_progress_bar.setValue(ratio)
+            ratio = int(StateManager.instance().player_mmr_ratio() * 100)
+            self.player_mmr_progress_bar.setValue(ratio)
+        else:
+            self.player_score_progress_bar.setVisible(False)
+            self.player_mmr_progress_bar.setVisible(False)
 
     def add_to_bet_amount(self, delta):
         self.update_text_field(self.get_bet_amount() + delta)
 
-    def update_text_field(self, value, prevent_signal=False):
+    def update_text_field(self, value: int, prevent_signal=False):
         if prevent_signal:  # To prevent recursive loop
             self.bet_amount.blockSignals(True)
-        new_value = np.clip(value, 1, 200)
+        # noinspection PyTypeChecker
+        new_value: int = np.clip(value, 1, 200)
         self.bet_amount.setText(str(new_value))
         self.slider.setValue(new_value)
         if prevent_signal:
