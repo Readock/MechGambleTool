@@ -1,66 +1,21 @@
-﻿import numpy as np
-from PyQt5.QtGui import QIcon, QColor, QFontMetrics
-
-import json
+﻿import json
 import os
 
-from app import statics
-
+import numpy as np
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QWidget, QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QMainWindow, QTabWidget, QSlider
 )
-from PyQt5.QtCore import pyqtSignal
 
+from app import statics
 from app.configuration import settings
+from app.ui.elements.mighty_slider import MightyGambleSlider
 from app.ui.widgets.gambling import GambleScreenCoords
 from app.ui.widgets.gambling.GambleScreenCoords import CoordCollector, bet_team_blue, bet_team_red
-from PyQt5.QtGui import QPainter
-from PyQt5.QtCore import Qt
 
 DATA_FILE = "recent_bets.json"
 MAX_BUTTONS = 5
-
-
-class MightyGambleSlider(QSlider):
-    sliderBarClicked = pyqtSignal(int)
-
-    def __init__(self, label_step=25, orientation=Qt.Horizontal, parent=None):
-        super().__init__(orientation, parent)
-        self.setMinimum(1)
-        self.setMaximum(200)
-        self.setTickInterval(10)
-        self.setSingleStep(1)
-        self.setTickPosition(QSlider.TicksBelow)
-        self.label_step = label_step
-
-    def mouseReleaseEvent(self, event):
-        super().mouseReleaseEvent(event)
-
-        if event.button() == Qt.LeftButton:
-            event.accept()
-            x = event.pos().x()
-            value = (self.maximum() - self.minimum()) * x / self.width() + self.minimum()
-            self.sliderBarClicked.emit(int(value))
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-
-        painter = QPainter(self)
-        painter.setPen(QColor(55, 55, 55))
-
-        self.add_label_to_value(painter, self.minimum())
-        # Draw labels every label_step
-        for value in range(self.label_step, self.maximum() + 1, self.label_step):
-            self.add_label_to_value(painter, value)
-
-    def add_label_to_value(self, painter, value):
-        font_metrics = QFontMetrics(self.font())
-        # Position in pixels
-        ratio = (value - self.minimum()) / (self.maximum() - self.minimum())
-        x = int(ratio * (self.width() - 16)) + 8  # Adjust for slider handle offset
-        label = str(value)
-        label_width = font_metrics.width(label)
-        painter.drawText(x - label_width // 2, self.height(), label)
 
 
 class Gambler(QMainWindow):
@@ -175,7 +130,6 @@ class Gambler(QMainWindow):
         bet_red.clicked.connect(self.handle_team_red_clicked)
         self.recalibrate.clicked.connect(self.calibrate)
 
-
         self.decrease_button = QPushButton("-")
         self.decrease_button.setFixedSize(25, 25)
         self.decrease_button.clicked.connect(lambda: self.add_to_bet_amount(-1))
@@ -183,7 +137,6 @@ class Gambler(QMainWindow):
         self.increase_button = QPushButton("+")
         self.increase_button.setFixedSize(25, 25)
         self.increase_button.clicked.connect(lambda: self.add_to_bet_amount(1))
-
 
         # Anordnung
         top_layout.addWidget(bet_blue, alignment=Qt.AlignLeft)
