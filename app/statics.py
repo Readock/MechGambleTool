@@ -1,8 +1,7 @@
-import win32gui
+from screeninfo import get_monitors
 from PyQt5.QtGui import QColor
 import sys
 from PyQt5.QtWidgets import QApplication, QMessageBox, QMainWindow
-
 
 class RelativeScreenWindowTransformResult:
     def __init__(self, width, height, x, y):
@@ -11,16 +10,28 @@ class RelativeScreenWindowTransformResult:
         self.height = height
         self.width = width
 
+def get_monitor():
+    primary_monitor = next((m for m in get_monitors() if m.is_primary), get_monitors()[0])
+    return primary_monitor
 
 def relative_screen_window_transform(width, height, x_percent, y_percent):
-    """ Calculates transform to place window independent of screen resolution """
-    hwnd = win32gui.GetDesktopWindow()
-    rect = win32gui.GetWindowRect(hwnd)
+    """Calculates transform to place window independent of screen resolution."""
+    # Get the primary monitor's dimensions
+    primary_monitor = get_monitor()
+    screen_width = primary_monitor.width
+    screen_height = primary_monitor.height
 
-    return RelativeScreenWindowTransformResult(x=int(x_percent * (rect[0] + rect[2])) - int(width / 2),
-                                               y=int(y_percent * (rect[1] + rect[3])) - height,
-                                               height=height,
-                                               width=width)
+
+    # Calculate x, y coordinates based on percentages
+    x = int(x_percent * screen_width) - int(width / 2)
+    y = int(y_percent * screen_height) - height
+
+    return RelativeScreenWindowTransformResult(
+        x=x,
+        y=y,
+        height=height,
+        width=width
+    )
 
 
 def calculate_color(percentage: float):

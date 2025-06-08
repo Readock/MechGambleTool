@@ -7,10 +7,9 @@ import zipfile
 import shutil
 import subprocess
 import tempfile
-import tkinter as tk
-from tkinter import messagebox
 from pathlib import Path
 from packaging.version import Version, InvalidVersion
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
 VERSION_FOLDER_PATTERN = re.compile(r"v(\d.+)")
 
@@ -76,17 +75,34 @@ def launch_exe(exe_path: Path):
     subprocess.Popen([str(exe_path)])
 
 
+
+#def ask_should_update(current, next, url):
+#    app = QApplication.instance() or QApplication(sys.argv)
+#    root.withdraw()
+#    return messagebox.askyesno("Update available!", f"""Current Version: {current}
+#New Version: {next}
+#
+#{url}
+#
+#Do you want to download and install the new version?
+#    """)
+
+
 def ask_should_update(current, next, url):
-    root = tk.Tk()
-    root.withdraw()
-    return messagebox.askyesno("Update available!", f"""Current Version: {current}
-New Version: {next}
+    # Create QApplication if none exists
+    app = QApplication.instance() or QApplication(sys.argv)
 
-{url}
+    # Create and configure the message box
+    msg_box = QMessageBox()
+    msg_box.setWindowTitle("Update available!")
+    msg_box.setText(f"Current Version: {current}\nNew Version: {next}\n\n{url}")
+    msg_box.setInformativeText("Do you want to download and install the new version?")
+    msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    msg_box.setDefaultButton(QMessageBox.Yes)
 
-Do you want to download and install the new version?
-    """)
-
+    # Execute the dialog and return True for Yes, False for No
+    result = msg_box.exec_()
+    return result == QMessageBox.Yes
 
 def clean_old_versions(exclude_folder: Path):
     for entry in Path(".").iterdir():

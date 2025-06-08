@@ -13,7 +13,7 @@ from app.configuration import settings
 from app.service.state_manager import StateManager
 from app.ui.elements.mighty_slider import MightyGambleSlider
 from app.ui.widgets.gambling import GambleScreenCoords
-from app.ui.widgets.gambling.GambleScreenCoords import CoordCollector, bet_team_blue, bet_team_red
+#from app.ui.widgets.gambling.GambleScreenCoords import CoordCollector, bet_team_blue, bet_team_red
 
 DATA_FILE = "recent_bets.json"
 MAX_BUTTONS = 5
@@ -24,6 +24,8 @@ class Gambler(QMainWindow):
         super().__init__(parent=parent)
 
         self.leaderboard = leaderboard
+        self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
+        self.setWindowTitle("MechGambleTool-Gambler")
 
         self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         self.setWindowOpacity(settings.window_opacity())
@@ -31,8 +33,6 @@ class Gambler(QMainWindow):
         transform = statics.relative_screen_window_transform(450, 200, 0.2, 0.90)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
 
-        self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
-        self.setWindowTitle("Gamble")
 
         # main window
         self.main_widget = QWidget(self)
@@ -307,8 +307,9 @@ class Gambler(QMainWindow):
     # CALIBRATION
 
     def calibrate(self):
-        collector = CoordCollector()
-        collector.start()
+        # TODO: unfuck this
+        #collector = CoordCollector()
+        #collector.start()
 
         self.recalibrate.setText("Recalibrate")
 

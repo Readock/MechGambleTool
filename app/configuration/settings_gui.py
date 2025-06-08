@@ -23,7 +23,7 @@ class SettingsUI(QWidget):
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
 
         self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
-        self.setWindowTitle("Settings Editor")
+        self.setWindowTitle("MechGambleTool-Settings")
 
         self.settings = settings.get_settings()
 

@@ -16,12 +16,12 @@ class PlayerPicker(QMainWindow):
         self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         self.on_select_callback = on_select_callback
 
+        self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
+        self.setWindowTitle("MechGambleTool-Picker")
+
         transform = statics.relative_screen_window_transform(600, 700, 0.8, 0.99)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
         self.setWindowOpacity(settings.window_opacity())
-
-        self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
-        self.setWindowTitle("MechGambleTool")
 
         self.main_widget = QWidget(self)
         self.main_widget.setContentsMargins(0, 0, 0, 0)

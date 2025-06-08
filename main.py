@@ -2,9 +2,9 @@ import asyncio
 import os
 import sys
 import qdarktheme
-import pywinstyles
+# import pywinstyles
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QPalette, QColor
 from PyQt5.QtWidgets import QApplication, QSplashScreen
 import threading
 
@@ -29,7 +29,7 @@ class App(QApplication):
         self.state_manager = StateManager.init(leaderboard=self.leaderboard)
         self.widget_tool_bar = WidgetToolBar(application=self, leaderboard=self.leaderboard)
         # pywinstyles.apply_style(demo, "aero")
-        pywinstyles.apply_style(self.widget_tool_bar, "dark")
+        # pywinstyles.apply_style(self.widget_tool_bar, "dark")
         self.splash.finish(None)
         self.widget_tool_bar.show()
 
@@ -55,11 +55,13 @@ if __name__ == "__main__":
     App.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
     app = App()
+
     loop = asyncio.get_event_loop()
     t = threading.Thread(target=init_thread, args=(loop, app,))
     t.start()
 
-    qdarktheme.setup_theme()
+    dark_palette = qdarktheme.load_palette("dark")
+    app.setPalette(dark_palette)
 
     exit_code = app.exec_()
 

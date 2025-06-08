@@ -1,17 +1,18 @@
 ﻿import json
 import os
 import time
-import tkinter as tk
-from tkinter import Canvas
+# import tkinter as tk
+# from tkinter import Canvas
 
-import pyautogui
+# import pyautogui
+from pynput.mouse import Button, Controller
 
 from app import statics
 from app.configuration import settings
 
 COORD_LABELS = ['join_bet', 'blue_team', 'slider_200', 'slider_1', 'confirm', 'close_window']
 coords_file = "screen_coords.json"
-
+mouse = Controller()
 
 def load_coords_from_json(filename=coords_file):
     if not os.path.exists(filename):
@@ -22,8 +23,10 @@ def load_coords_from_json(filename=coords_file):
 
 
 def simulate_click(x, y):
-    pyautogui.moveTo(x, y)
-    pyautogui.click()
+    #https://pynput.readthedocs.io/en/latest/mouse.html#controlling-the-mouse
+    mouse.move(x, y)
+    mouse.press(Button.left)
+    mouse.release(Button.left)
 
 
 def click_join_bet():
@@ -37,7 +40,7 @@ def click_blue_team():
 
 
 def click_red_team():
-    screen_width, _ = pyautogui.size()
+    screen_width, _ = statics.get_monitor().width
     coords = load_coords_from_json()
     x, y = coords['blue_team']
     mirrored_x = screen_width - x
@@ -100,89 +103,89 @@ def bet_team_red(value):
     click_close()
 
 
-class CoordCollector:
-    def __init__(self):
-        self.root = tk.Tk()
-        self.root.attributes("-fullscreen", True)
-        self.root.attributes("-topmost", True)
-        self.root.attributes("-alpha", 0.5)  # Semi-transparent overlay
-        self.root.configure(bg='gray')  # Solid color for background
-        self.root.overrideredirect(True)
-        self.root.withdraw()  # Start hidden
-
-        self.canvas = Canvas(self.root, bg='gray', highlightthickness=0)
-        self.canvas.pack(fill=tk.BOTH, expand=True)
-        self.canvas.config(cursor="crosshair")
-
-        self.coords = {}
-        self.current_index = 0
-        self.click_enabled = True
-
-        # Label at the top-left to show which coordinate is being set
-        self.info_label = tk.Label(self.root, text="Setting coordinate...", fg="white", bg="gray",
-                                   font=("Arial", 33, "bold"))
-        self.info_label.place(x=20, y=20)
-
-        self.canvas.bind("<ButtonRelease-1>", self.on_click)
-
-    def start(self):
-        self.root.deiconify()
-        self.root.lift()
-        self.root.focus_force()
-        self.loop_step()
-        self.root.mainloop()
-
-    def loop_step(self):
-        if self.current_index >= len(COORD_LABELS):
-            self.finish()
-            return
-
-        # Update the label to show which coordinate is being set
-        label = COORD_LABELS[self.current_index]
-        self.info_label.config(text=f"Setting coordinate: {label}")
-
-        self.click_enabled = True
-
-    def on_click(self, event):
-        if not self.click_enabled:
-            return
-
-        self.click_enabled = False
-
-        label = COORD_LABELS[self.current_index]
-        x = self.root.winfo_pointerx()
-        y = self.root.winfo_pointery()
-
-        self.coords[label] = (x, y)
-        self.draw_crosshair(x, y, label)
-
-        # Hide, simulate, and continue
-        self.root.withdraw()
-        self.root.update()
-        time.sleep(float(settings.get_settings().click_delay) + 0.1)
-        pyautogui.moveTo(x, y)
-        pyautogui.click()
-
-        self.current_index += 1
-        self.root.after(200, self.resume)
-
-    def resume(self):
-        if self.current_index < len(COORD_LABELS):
-            self.root.deiconify()
-            self.loop_step()
-        else:
-            self.finish()
-
-    def draw_crosshair(self, x, y, label):
-        size = 10
-        self.canvas.create_line(x - size, y, x + size, y, fill="red", width=2)
-        self.canvas.create_line(x, y - size, x, y + size, fill="red", width=2)
-        self.canvas.create_text(x + 15, y - 15, text=label, fill="white", font=("Arial", 12, "bold"))
-
-    def finish(self):
-        with open(coords_file, 'w') as f:
-            json.dump(self.coords, f, indent=4)
-        self.root.destroy()
+# class CoordCollector:
+#     def __init__(self):
+#         self.root = tk.Tk()
+#         self.root.attributes("-fullscreen", True)
+#         self.root.attributes("-topmost", True)
+#         self.root.attributes("-alpha", 0.5)  # Semi-transparent overlay
+#         self.root.configure(bg='gray')  # Solid color for background
+#         self.root.overrideredirect(True)
+#         self.root.withdraw()  # Start hidden
+#
+#         self.canvas = Canvas(self.root, bg='gray', highlightthickness=0)
+#         self.canvas.pack(fill=tk.BOTH, expand=True)
+#         self.canvas.config(cursor="crosshair")
+#
+#         self.coords = {}
+#         self.current_index = 0
+#         self.click_enabled = True
+#
+#         # Label at the top-left to show which coordinate is being set
+#         self.info_label = tk.Label(self.root, text="Setting coordinate...", fg="white", bg="gray",
+#                                    font=("Arial", 33, "bold"))
+#         self.info_label.place(x=20, y=20)
+#
+#         self.canvas.bind("<ButtonRelease-1>", self.on_click)
+#
+#     def start(self):
+#         self.root.deiconify()
+#         self.root.lift()
+#         self.root.focus_force()
+#         self.loop_step()
+#         self.root.mainloop()
+#
+#     def loop_step(self):
+#         if self.current_index >= len(COORD_LABELS):
+#             self.finish()
+#             return
+#
+#         # Update the label to show which coordinate is being set
+#         label = COORD_LABELS[self.current_index]
+#         self.info_label.config(text=f"Setting coordinate: {label}")
+#
+#         self.click_enabled = True
+#
+#     def on_click(self, event):
+#         if not self.click_enabled:
+#             return
+#
+#         self.click_enabled = False
+#
+#         label = COORD_LABELS[self.current_index]
+#         x = self.root.winfo_pointerx()
+#         y = self.root.winfo_pointery()
+#
+#         self.coords[label] = (x, y)
+#         self.draw_crosshair(x, y, label)
+#
+#         # Hide, simulate, and continue
+#         self.root.withdraw()
+#         self.root.update()
+#         time.sleep(float(settings.get_settings().click_delay) + 0.1)
+#         pyautogui.moveTo(x, y)
+#         pyautogui.click()
+#
+#         self.current_index += 1
+#         self.root.after(200, self.resume)
+#
+#     def resume(self):
+#         if self.current_index < len(COORD_LABELS):
+#             self.root.deiconify()
+#             self.loop_step()
+#         else:
+#             self.finish()
+#
+#     def draw_crosshair(self, x, y, label):
+#         size = 10
+#         self.canvas.create_line(x - size, y, x + size, y, fill="red", width=2)
+#         self.canvas.create_line(x, y - size, x, y + size, fill="red", width=2)
+#         self.canvas.create_text(x + 15, y - 15, text=label, fill="white", font=("Arial", 12, "bold"))
+#
+#     def finish(self):
+#         with open(coords_file, 'w') as f:
+#             json.dump(self.coords, f, indent=4)
+#         self.root.destroy()
 
 
 if __name__ == "__main__":

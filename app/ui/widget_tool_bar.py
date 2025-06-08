@@ -1,7 +1,7 @@
 import os
 import sys
 
-import pywinstyles
+# import pywinstyles
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QMainWindow, QHBoxLayout, QToolBar, QToolButton
 import qtawesome as qta
@@ -30,6 +30,8 @@ class WidgetToolBar(QMainWindow):
         super().__init__(parent=parent)
         self.application = application
         self.leaderboard = leaderboard
+
+        self.setWindowTitle("MechGambleTool-ToolBar")
 
         self.setWindowFlags(
             Qt.Window | Qt.WindowStaysOnTopHint | Qt.CustomizeWindowHint | Qt.WindowType.FramelessWindowHint)
@@ -140,7 +142,7 @@ class WidgetToolBar(QMainWindow):
         else:
             self.picker_window = PlayerPicker(leaderboard=self.leaderboard,
                                               on_select_callback=self.toggle_player_select)
-            pywinstyles.apply_style(self.picker_window, "dark")
+            # pywinstyles.apply_style(self.picker_window, "dark")
             self.picker_window.showNormal()
 
     def toggle_player_select(self, player_id):
@@ -168,7 +170,7 @@ class WidgetToolBar(QMainWindow):
             self.gamble_window = None
         else:
             self.gamble_window = Gambler(leaderboard=self.leaderboard)
-            pywinstyles.apply_style(self.gamble_window, "dark")
+            # pywinstyles.apply_style(self.gamble_window, "dark")
             self.gamble_window.showNormal()
 
     def player_chart(self):
@@ -177,7 +179,7 @@ class WidgetToolBar(QMainWindow):
             self.player_chart_window = None
         else:
             self.player_chart_window = PlayerChart(leaderboard=self.leaderboard)
-            pywinstyles.apply_style(self.player_chart_window, "dark")
+            # pywinstyles.apply_style(self.player_chart_window, "dark")
             self.player_chart_window.showNormal()
 
     def launch_game(self):
@@ -193,7 +195,7 @@ class WidgetToolBar(QMainWindow):
             self.settings_window = None
         else:
             self.settings_window = SettingsUI(app=self.application, settings_save_callback=self.settings_saved)
-            pywinstyles.apply_style(self.settings_window, "dark")
+            # pywinstyles.apply_style(self.settings_window, "dark")
             self.settings_window.showNormal()
 
     def settings_saved(self):

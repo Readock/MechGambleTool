@@ -16,6 +16,9 @@ class PlayerChart(QMainWindow):
     def __init__(self, parent=None, leaderboard=None):
         super().__init__(parent=parent)
 
+        self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
+        self.setWindowTitle("MechGambleTool-Chart")
+
         # self.setWindowFlags(
         #     Qt.Window | Qt.WindowStaysOnTopHint | Qt.CustomizeWindowHint | Qt.WindowType.FramelessWindowHint)
         self.setWindowFlags(
@@ -24,9 +27,6 @@ class PlayerChart(QMainWindow):
 
         transform = statics.relative_screen_window_transform(800, 300, 0.5, 0.95)
         self.setGeometry(transform.x, transform.y, transform.width, transform.height)
-
-        self.setWindowIcon(QIcon("resources/w0BJbj40_400x400.jpg"))
-        self.setWindowTitle("Player Chart")
 
         self.main_widget = QWidget(self)
         self.main_widget.setContentsMargins(0, 0, 0, 0)
